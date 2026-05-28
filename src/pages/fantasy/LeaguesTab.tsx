@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Plus, LogIn, Trophy, Globe, Shield, ChevronDown, ChevronUp, UserPlus } from 'lucide-react';
+import { Users, Plus, Key, Trophy, Globe, Shield, ChevronDown, ChevronUp, UserPlus } from 'lucide-react';
 import * as fantasyApi from '../../api/fantasy';
 import type { FantasyLeague } from '../../api/fantasy';
 import { LeagueDetail } from './LeagueDetail';
@@ -156,6 +156,24 @@ export function LeaguesTab({ seasonId, isAuthenticated, userId, onGoToLogin, spe
     setJoining(false);
   }
 
+  async function handleDeleteLeague(leagueId: number) {
+    try {
+      await fantasyApi.deleteLeague(leagueId);
+      setMyLeagues(prev => prev.filter(l => l.id !== leagueId));
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Failed to delete league');
+    }
+  }
+
+  async function handleLeaveLeague(leagueId: number) {
+    try {
+      await fantasyApi.leaveLeague(leagueId);
+      setMyLeagues(prev => prev.filter(l => l.id !== leagueId));
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Failed to leave league');
+    }
+  }
+
   if (activeLeagueId !== null) {
     return (
       <LeagueDetail
@@ -303,27 +321,38 @@ export function LeaguesTab({ seasonId, isAuthenticated, userId, onGoToLogin, spe
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Explanation banner — dismissable */}
+      <div className="rounded-2xl px-4 py-3 mb-5 flex items-start gap-3"
+        style={{ background: '#0d1017', border: '1px solid rgba(245,158,11,0.15)' }}>
+        <Users className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm text-gray-300 font-bold">Liga = leaderboard privat</p>
+          <p className="text-xs text-gray-500 mt-0.5">Buat liga, undang teman pakai kode, dan lihat siapa yang paling jago di antara kalian.</p>
+        </div>
+      </div>
+
       {/* Action buttons */}
       <div className="flex gap-3 mb-6">
         <button onClick={() => { setShowCreate(v => !v); setShowJoin(false); }}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-black"
           style={{ background: 'linear-gradient(135deg,#FBBF24,#F59E0B)' }}>
-          <Plus className="w-4 h-4" /> Buat Liga
+          <Plus className="w-4 h-4" /> Buat Liga Baru
         </button>
         <button onClick={() => { setShowJoin(v => !v); setShowCreate(false); }}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
           style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <LogIn className="w-4 h-4" /> Masuk Liga
+          <Key className="w-4 h-4" /> Punya Kode?
         </button>
       </div>
 
-      {/* Create form */}
+      {/* Create form — with clear purpose */}
       {showCreate && (
         <form onSubmit={handleCreate} className="rounded-2xl p-5 mb-5 space-y-3"
           style={{ background: '#0d1017', border: '1px solid rgba(245,158,11,0.2)' }}>
           <h4 className="text-sm font-black text-white">Buat Liga Baru</h4>
+          <p className="text-xs text-gray-500">Liga privat = ranking khusus kamu & teman-temanmu. Setelah dibuat, kamu akan dapat kode undangan untuk dishare.</p>
           <input value={createName} onChange={e => setCreateName(e.target.value)}
-            placeholder="Nama liga (misal: Geng Kantor S1)"
+            placeholder="Nama liga (contoh: Geng ML, Kantor FC)"
             className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none"
             style={{ background: '#07090f', border: '1px solid rgba(255,255,255,0.1)' }} />
           <div className="flex items-center gap-3">
@@ -334,11 +363,17 @@ export function LeaguesTab({ seasonId, isAuthenticated, userId, onGoToLogin, spe
               style={{ background: '#07090f', border: '1px solid rgba(255,255,255,0.1)' }} />
           </div>
           {createErr && <p className="text-red-400 text-xs">{createErr}</p>}
-          <button type="submit" disabled={creating}
-            className="px-5 py-2 rounded-xl font-bold text-sm text-black disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg,#FBBF24,#F59E0B)' }}>
-            {creating ? 'Membuat...' : 'Buat Liga'}
-          </button>
+          <div className="flex gap-2">
+            <button type="submit" disabled={creating}
+              className="px-5 py-2 rounded-xl font-bold text-sm text-black disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg,#FBBF24,#F59E0B)' }}>
+              {creating ? 'Membuat...' : 'Buat Liga'}
+            </button>
+            <button type="button" onClick={() => setShowCreate(false)}
+              className="px-4 py-2 rounded-xl text-sm font-bold text-gray-500 hover:text-white transition-colors">
+              Batal
+            </button>
+          </div>
         </form>
       )}
 
@@ -558,6 +593,8 @@ export function LeaguesTab({ seasonId, isAuthenticated, userId, onGoToLogin, spe
               league={league}
               onOpen={() => setActiveLeagueId(league.id)}
               currentUserId={userId}
+              onDelete={handleDeleteLeague}
+              onLeave={handleLeaveLeague}
             />
           ))}
         </div>

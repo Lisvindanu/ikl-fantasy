@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Copy, Check, Pencil, Share2, ArrowRightLeft, AlertTriangle, Eye, LogIn, UserPlus, MessageCircle, ChevronDown, Swords, Trophy } from 'lucide-react';
+import { Copy, Check, Pencil, Share2, ArrowRightLeft, AlertTriangle, Eye, LogIn, UserPlus, MessageCircle, ChevronDown, Swords, Trophy, Trash2, LogOut } from 'lucide-react';
 import * as fantasyApi from '../../api/fantasy';
 import type { FantasyLeague, LeagueMemberEntry, LeagueActivity, KnockoutSummary, Knockout, KnockoutMatch } from '../../api/fantasy';
 import { LeagueChat } from './LeagueChat';
@@ -276,38 +276,65 @@ export function LeagueDetail({ leagueId, onBack, currentUserId, isAuthenticated 
         )}
       </div>
 
-      {/* Transfer ownership */}
+      {/* Creator actions: Transfer + Delete | Member: Leave */}
       {isCreator && (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <button onClick={() => setShowTransfer(true)}
+            className="flex items-center gap-2 text-xs text-gray-600 hover:text-gray-300 font-bold transition-colors">
+            <ArrowRightLeft className="w-3.5 h-3.5" /> Transfer Ownership
+          </button>
+          <button onClick={async () => {
+            if (!confirm('Yakin hapus liga ini? Semua data liga akan hilang.')) return;
+            try {
+              await fantasyApi.deleteLeague(leagueId);
+              onBack();
+            } catch (e: unknown) { alert(e instanceof Error ? e.message : 'Failed to delete'); }
+          }}
+            className="flex items-center gap-2 text-xs text-red-500/70 hover:text-red-400 font-bold transition-colors">
+            <Trash2 className="w-3.5 h-3.5" /> Hapus Liga
+          </button>
+        </div>
+      )}
+      {isMember && !isCreator && (
         <div className="mb-4">
-          {!showTransfer ? (
-            <button onClick={() => setShowTransfer(true)}
-              className="flex items-center gap-2 text-xs text-gray-600 hover:text-gray-300 font-bold transition-colors">
-              <ArrowRightLeft className="w-3.5 h-3.5" /> Transfer Ownership
-            </button>
-          ) : (
-            <div className="rounded-xl p-4 space-y-3" style={{ background: '#0d1017', border: '1px solid rgba(239,68,68,0.2)' }}>
-              <p className="text-xs font-bold text-gray-400">Transfer ownership to a member:</p>
-              <select value={transferTarget ?? ''} onChange={e => setTransferTarget(Number(e.target.value) || null)}
-                className="w-full px-3 py-2 rounded-xl text-white text-sm outline-none"
-                style={{ background: '#07090f', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <option value="">Select member...</option>
-                {data.leaderboard.filter(m => m.user_id !== currentUserId).map(m => (
-                  <option key={m.user_id} value={m.user_id}>{m.user_name}</option>
-                ))}
-              </select>
-              {transferMsg && <p className={`text-xs ${transferMsg.includes('transferred') ? 'text-green-400' : 'text-red-400'}`}>{transferMsg}</p>}
-              <div className="flex gap-2">
-                <button onClick={() => { setShowTransfer(false); setTransferTarget(null); setTransferMsg(''); }}
-                  className="px-4 py-1.5 rounded-xl text-xs font-bold text-gray-400"
-                  style={{ background: 'rgba(255,255,255,0.05)' }}>Cancel</button>
-                <button onClick={handleTransfer} disabled={!transferTarget || transferring}
-                  className="px-4 py-1.5 rounded-xl text-xs font-bold text-white disabled:opacity-40"
-                  style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)' }}>
-                  {transferring ? 'Transferring...' : 'Confirm Transfer'}
-                </button>
-              </div>
+          <button onClick={async () => {
+            if (!confirm('Yakin keluar dari liga ini?')) return;
+            try {
+              await fantasyApi.leaveLeague(leagueId);
+              onBack();
+            } catch (e: unknown) { alert(e instanceof Error ? e.message : 'Failed to leave'); }
+          }}
+            className="flex items-center gap-2 text-xs text-red-500/70 hover:text-red-400 font-bold transition-colors">
+            <LogOut className="w-3.5 h-3.5" /> Keluar Liga
+          </button>
+        </div>
+      )}
+
+      {/* Transfer ownership form */}
+      {isCreator && showTransfer && (
+        <div className="mb-4">
+          <div className="rounded-xl p-4 space-y-3" style={{ background: '#0d1017', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <p className="text-xs font-bold text-gray-400">Transfer ownership to a member:</p>
+            <select value={transferTarget ?? ''} onChange={e => setTransferTarget(Number(e.target.value) || null)}
+              className="w-full px-3 py-2 rounded-xl text-white text-sm outline-none"
+              style={{ background: '#07090f', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <option value="">Select member...</option>
+              {data.leaderboard.filter(m => m.user_id !== currentUserId).map(m => (
+                <option key={m.user_id} value={m.user_id}>{m.user_name}</option>
+              ))}
+            </select>
+            {transferMsg && <p className={`text-xs ${transferMsg.includes('transferred') ? 'text-green-400' : 'text-red-400'}`}>{transferMsg}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => { setShowTransfer(false); setTransferTarget(null); setTransferMsg(''); }}
+                className="px-4 py-1.5 rounded-xl text-xs font-bold text-gray-400"
+                style={{ background: 'rgba(255,255,255,0.05)' }}>Cancel</button>
+              <button onClick={handleTransfer} disabled={!transferTarget || transferring}
+                className="px-4 py-1.5 rounded-xl text-xs font-bold text-white disabled:opacity-40"
+                style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                {transferring ? 'Transferring...' : 'Confirm Transfer'}
+              </button>
             </div>
-          )}
+          </div>
         </div>
       )}
 

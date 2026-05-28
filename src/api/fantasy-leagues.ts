@@ -95,6 +95,28 @@ export async function transferLeagueOwnership(leagueId: number, newOwnerId: numb
   return d;
 }
 
+export async function deleteLeague(leagueId: number): Promise<void> {
+  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}`, {
+    method: 'DELETE',
+    headers: authHeader(),
+  });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete league');
+  }
+}
+
+export async function leaveLeague(leagueId: number): Promise<void> {
+  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}/leave`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+  });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to leave league');
+  }
+}
+
 export async function updateLeague(leagueId: number, data: { name?: string; maxMembers?: number }): Promise<FantasyLeague> {
   const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}`, {
     method: 'PUT',
