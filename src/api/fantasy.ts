@@ -39,6 +39,7 @@ export interface IKLTeam {
   map_losses: number;
   prize: string;
   qualified_kwc: boolean;
+  logo_url: string | null;
 }
 
 export interface IKLPlayer {
@@ -130,9 +131,11 @@ export interface IKLMatch {
   team1_name: string;
   team1_short: string;
   team1_color: string;
+  team1_logo: string | null;
   team2_name: string;
   team2_short: string;
   team2_color: string;
+  team2_logo: string | null;
   winner_name: string | null;
   winner_short: string | null;
   vod_url: string | null;
@@ -204,6 +207,7 @@ export interface TeamStanding {
   team_name: string;
   short_name: string;
   color: string;
+  logo_url: string | null;
   wins: number;
   losses: number;
   draws: number;

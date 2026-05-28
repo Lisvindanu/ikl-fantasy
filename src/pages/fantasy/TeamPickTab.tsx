@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Shield, Trophy, Check, TrendingUp, AlertTriangle, Info } from 'lucide-react';
 import type { IKLTeam, IKLSeason, FantasyTeamSelection, TeamLeaderboardEntry, LoyaltyInfo } from '../../api/fantasy';
 import * as fantasyApi from '../../api/fantasy';
+import { API } from '../../api/fantasy';
 
 // ── Scoring reference ──────────────────────────────────────────────────────────
 const SCORING = [
@@ -33,8 +34,19 @@ function TeamCard({
       }}
     >
       <div className="flex items-center gap-3">
-        {/* Color bar */}
-        <div className="w-2 h-12 rounded-full flex-shrink-0" style={{ background: team.color }} />
+        {/* Team logo */}
+        {team.logo_url ? (
+          <img
+            src={`${API}${team.logo_url}`}
+            alt={team.short_name}
+            className="w-10 h-10 object-contain flex-shrink-0"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0"
+            style={{ background: `${team.color}25`, color: team.color }}>
+            {team.short_name}
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
