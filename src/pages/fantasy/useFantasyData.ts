@@ -133,11 +133,22 @@ export function useFantasyData() {
     return () => { cancelled = true; };
   }, [isAuthenticated]);
 
-  // #119: Record daily login streak when authenticated
+  // #119: Record daily login streak when authenticated (once per session)
   useEffect(() => {
     if (!isAuthenticated) return;
+    const key = 'ikl_streak_recorded';
+    if (sessionStorage.getItem(key)) {
+      // Already recorded this session — just fetch current streak
+      fantasyApi.getLoginStreak().then(r => {
+        if (r) setLoginStreak({ ...r, bonusAwarded: 0, isNewDay: false });
+      }).catch(() => {});
+      return;
+    }
     fantasyApi.recordLoginStreak().then(r => {
-      if (r) setLoginStreak(r);
+      if (r) {
+        setLoginStreak(r);
+        try { sessionStorage.setItem(key, '1'); } catch { /* ignore */ }
+      }
     }).catch(() => {});
   }, [isAuthenticated]);
 
