@@ -76,7 +76,7 @@ export function PlayerDetailOverlay({
       canPick={canPick}
       onPick={onPick}
       ownership={ownershipData && ownershipData.total > 0
-        ? Math.round(((ownershipData.ownership[player.id] || 0) / ownershipData.total) * 100)
+        ? (ownershipData.ownership[player.id] || 0)
         : undefined}
       form={formData.find(f => f.player_id === player.id)?.form}
       streak={formData.find(f => f.player_id === player.id)?.streak}
