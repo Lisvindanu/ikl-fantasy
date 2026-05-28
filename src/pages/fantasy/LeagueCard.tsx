@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Copy, Check, Trophy, ExternalLink, MoreVertical, Trash2, Share2, LogOut } from 'lucide-react';
+import { Copy, Check, Trophy, MoreVertical, Trash2, Share2, LogOut } from 'lucide-react';
 import type { FantasyLeague } from '../../api/fantasy';
 
 interface LeagueCardProps {
