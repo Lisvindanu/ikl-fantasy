@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Wallet, LayoutGrid, Users, Save } from 'lucide-react';
 import { ROLE_META, ROLES, FORMATION_LAYOUT, BUDGET, MAX_PER_TEAM } from '../../components/fantasy/types';
