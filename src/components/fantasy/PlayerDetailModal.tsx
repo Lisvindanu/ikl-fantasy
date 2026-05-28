@@ -287,7 +287,7 @@ export function PlayerDetailModal({ player, onClose, onPick, isPicked, canPick, 
 
             {/* View profile + action button */}
             <div className="px-4 py-4 space-y-2">
-              <a href={`/fantasy-player?playerId=${player.id}`}
+              <a href={`/player?playerId=${player.id}`}
                 className="block w-full py-2 rounded-xl font-bold text-xs text-center tracking-wide text-gray-400 hover:text-white transition-colors"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 View Full Profile
