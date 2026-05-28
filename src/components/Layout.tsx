@@ -49,7 +49,7 @@ export function Layout() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Google login failed');
-      login(data.token, data.user, data.refreshToken);
+      login(data.token, data.contributor, data.refreshToken);
     } catch (err) {
       console.error('Google login failed:', err);
     }
