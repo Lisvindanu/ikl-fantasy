@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Trophy, Swords, TrendingUp, Globe, Shield, Gamepad2, Users } from 'lucide-react';
+import { Menu, X, LogOut, Shield, Gamepad2, Users } from 'lucide-react';
+import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { useAuth } from '../contexts/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://hokapi.project-n.site';
@@ -16,35 +17,8 @@ interface NavLink {
 const NAV_LINKS: readonly NavLink[] = [
   { to: '/', label: 'Home', icon: <Gamepad2 className="w-4 h-4" /> },
   { to: '/play', label: 'Play', icon: <Users className="w-4 h-4" /> },
-  { to: '/play?tab=matches', label: 'Matches', icon: <Swords className="w-4 h-4" /> },
-  { to: '/play?tab=overview', label: 'Standings', icon: <TrendingUp className="w-4 h-4" /> },
-  { to: '/play?tab=leaderboard', label: 'Leaderboard', icon: <Trophy className="w-4 h-4" /> },
-  { to: '/play?tab=leagues', label: 'Leagues', icon: <Globe className="w-4 h-4" /> },
   { to: '/admin', label: 'Admin', icon: <Shield className="w-4 h-4" />, adminOnly: true },
 ] as const;
-
-function GoogleIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-    </svg>
-  );
-}
-
-function handleGoogleLogin() {
-  const width = 500;
-  const height = 600;
-  const left = window.screenX + (window.outerWidth - width) / 2;
-  const top = window.screenY + (window.outerHeight - height) / 2;
-  window.open(
-    `${API_BASE}/api/auth/google`,
-    'google-login',
-    `width=${width},height=${height},left=${left},top=${top}`,
-  );
-}
 
 export function Layout() {
   const { user, isAuthenticated, login, logout } = useAuth();
@@ -52,54 +26,47 @@ export function Layout() {
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [currentPath]);
-
-  // Listen for Google OAuth callback messages
-  const handleOAuthMessage = useCallback(
-    (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-      const { token, user: oauthUser, refreshToken } = event.data ?? {};
-      if (token && oauthUser) {
-        login(token, oauthUser, refreshToken);
-      }
-    },
-    [login],
-  );
-
-  useEffect(() => {
-    window.addEventListener('message', handleOAuthMessage);
-    return () => window.removeEventListener('message', handleOAuthMessage);
-  }, [handleOAuthMessage]);
 
   const visibleLinks = NAV_LINKS.filter(
     (link) => !link.adminOnly || user?.isAdmin,
   );
 
   function isActive(to: string): boolean {
-    const [path] = to.split('?');
-    if (path === '/') return currentPath === '/';
-    return currentPath.startsWith(path);
+    if (to === '/') return currentPath === '/';
+    return currentPath === to || currentPath.startsWith(to + '/');
+  }
+
+  async function handleGoogleSuccess(credentialResponse: CredentialResponse) {
+    if (!credentialResponse.credential) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Google login failed');
+      login(data.token, data.user, data.refreshToken);
+    } catch (err) {
+      console.error('Google login failed:', err);
+    }
   }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#07090f' }}>
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header
         className="sticky top-0 z-40 border-b border-white/[0.06]"
         style={{ background: '#07090fee', backdropFilter: 'blur(16px)' }}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14">
-            {/* Brand */}
             <Link to="/" className="flex items-center gap-2.5 group">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center font-display font-black text-xs text-black"
-                style={{
-                  background: 'linear-gradient(135deg, #FBBF24, #F59E0B)',
-                }}
+                style={{ background: 'linear-gradient(135deg, #FBBF24, #F59E0B)' }}
               >
                 IKL
               </div>
@@ -108,7 +75,6 @@ export function Layout() {
               </span>
             </Link>
 
-            {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-1">
               {visibleLinks.map((link) => {
                 const active = isActive(link.to);
@@ -129,7 +95,6 @@ export function Layout() {
               })}
             </nav>
 
-            {/* Auth section (desktop) */}
             <div className="hidden md:flex items-center gap-3">
               {isAuthenticated && user ? (
                 <div className="flex items-center gap-3">
@@ -144,10 +109,7 @@ export function Layout() {
                     ) : (
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black"
-                        style={{
-                          background: 'rgba(245,158,11,0.15)',
-                          color: '#F59E0B',
-                        }}
+                        style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
                       >
                         {user.name?.[0]?.toUpperCase() ?? '?'}
                       </div>
@@ -166,21 +128,17 @@ export function Layout() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={handleGoogleLogin}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all hover:bg-white/[0.08]"
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }}
-                >
-                  <GoogleIcon />
-                  Login with Google
-                </button>
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => console.error('Google login error')}
+                  size="medium"
+                  theme="filled_black"
+                  shape="pill"
+                  text="signin_with"
+                />
               )}
             </div>
 
-            {/* Mobile hamburger */}
             <button
               onClick={() => setMobileMenuOpen((v) => !v)}
               className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-colors"
@@ -195,7 +153,6 @@ export function Layout() {
           </div>
         </div>
 
-        {/* ── Mobile menu ───────────────────────────────────────────────────── */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -224,58 +181,41 @@ export function Layout() {
                   );
                 })}
 
-                {/* Mobile auth */}
                 <div className="pt-3 mt-2 border-t border-white/[0.06]">
                   {isAuthenticated && user ? (
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 px-4 py-2">
                         {user.avatar ? (
-                          <img
-                            src={user.avatar}
-                            alt={user.name}
+                          <img src={user.avatar} alt={user.name}
                             className="w-8 h-8 rounded-full border border-white/10"
-                            referrerPolicy="no-referrer"
-                          />
+                            referrerPolicy="no-referrer" />
                         ) : (
-                          <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
-                            style={{
-                              background: 'rgba(245,158,11,0.15)',
-                              color: '#F59E0B',
-                            }}
-                          >
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
+                            style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
                             {user.name?.[0]?.toUpperCase() ?? '?'}
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="text-white text-sm font-bold truncate">
-                            {user.name}
-                          </p>
-                          <p className="text-gray-600 text-xs truncate">
-                            {user.email}
-                          </p>
+                          <p className="text-white text-sm font-bold truncate">{user.name}</p>
+                          <p className="text-gray-600 text-xs truncate">{user.email}</p>
                         </div>
                       </div>
-                      <button
-                        onClick={logout}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-all"
-                      >
+                      <button onClick={logout}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-all">
                         <LogOut className="w-4 h-4" />
                         Logout
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={handleGoogleLogin}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-white transition-all"
-                      style={{
-                        background: 'rgba(255,255,255,0.06)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                      }}
-                    >
-                      <GoogleIcon />
-                      Login with Google
-                    </button>
+                    <div className="flex justify-center py-2">
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={() => console.error('Google login error')}
+                        size="large"
+                        theme="filled_black"
+                        width="280"
+                      />
+                    </div>
                   )}
                 </div>
               </nav>
@@ -284,21 +224,17 @@ export function Layout() {
         </AnimatePresence>
       </header>
 
-      {/* ── Main content ───────────────────────────────────────────────────── */}
       <main className="flex-1">
         <Outlet />
       </main>
 
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
       <footer className="border-t border-white/[0.06] py-6">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gray-600 text-xs font-bold">
-            IKL Fantasy &middot; Indonesia King&apos;s League &middot;{' '}
-            {new Date().getFullYear()}
+            IKL Fantasy &middot; Indonesia King's Laga &middot; {new Date().getFullYear()}
           </p>
           <p className="text-gray-700 text-[10px] mt-1">
-            Built for the IKL community. Not affiliated with Honor of Kings or
-            Moonton.
+            Built for the IKL community. Not affiliated with Honor of Kings.
           </p>
         </div>
       </footer>

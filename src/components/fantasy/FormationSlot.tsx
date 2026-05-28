@@ -64,7 +64,7 @@ export function FormationSlot({ role, player, isActive, onClick, onRemove, isCap
           {/* Captain / Vice badges */}
           {(isCaptain || isViceCaptain) && (
             <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider shadow-md ${
-              isCaptain ? 'bg-amber-500 text-black shadow-amber-500/40' : 'bg-sky-500 text-white shadow-sky-500/40'
+              isCaptain ? 'bg-amber-500 text-black shadow-amber-500/40' : 'bg-amber-500 text-white shadow-amber-500/40'
             }`}>
               {isCaptain ? 'CAP' : 'VICE'}
             </div>
@@ -81,8 +81,8 @@ export function FormationSlot({ role, player, isActive, onClick, onRemove, isCap
               <button onClick={onSetViceCaptain}
                 className={`px-3 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all min-w-[40px] ${
                   isViceCaptain
-                    ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/40 ring-2 ring-sky-400/50'
-                    : 'bg-sky-500/20 text-sky-300 hover:bg-sky-500/40 hover:text-sky-200 border border-sky-500/40'
+                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/40 ring-2 ring-amber-400/50'
+                    : 'bg-amber-500/20 text-amber-300 hover:bg-amber-500/40 hover:text-amber-200 border border-amber-500/40'
                 }`}>VICE</button>
             </div>
           )}
