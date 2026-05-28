@@ -147,7 +147,20 @@ export function FantasyLeaguePage() {
 
               {data.tab === 'overview' && (
                 <motion.div key="overview" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                  <StandingsTab season={season} sortedByPts={data.sortedByPts} maxPts={data.maxPts} onDetail={data.setDetailPlayer} />
+                  <StandingsTab
+                    season={season}
+                    sortedByPts={data.sortedByPts}
+                    maxPts={data.maxPts}
+                    onDetail={data.setDetailPlayer}
+                    onGoToDraft={() => data.setTab('draft')}
+                    onGoToTeam={() => data.setTab('team')}
+                    onGoToMatches={() => data.setTab('matches')}
+                    onGoToPredictions={() => data.setTab('predictions')}
+                    activeMode={data.activeMode}
+                    hasDraftPicks={data.filledCount > 0}
+                    hasTeamPick={!!data.myTeamSelection}
+                    isAuthenticated={data.isAuthenticated}
+                  />
                 </motion.div>
               )}
 
@@ -191,7 +204,7 @@ export function FantasyLeaguePage() {
 
               {data.tab === 'matches' && (
                 <motion.div key="matches" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                  <MatchesTab matches={data.matches} loading={false} seasonId={season?.id} />
+                  <MatchesTab matches={data.matches} loading={false} seasonId={season?.id} players={data.players} isAuthenticated={data.isAuthenticated} />
                 </motion.div>
               )}
 

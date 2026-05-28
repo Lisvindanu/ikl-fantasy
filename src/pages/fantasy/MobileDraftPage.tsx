@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Wallet, LayoutGrid, Users } from 'lucide-react';
+import { Search, Wallet, LayoutGrid, Users, Save } from 'lucide-react';
 import { ROLE_META, ROLES, FORMATION_LAYOUT, BUDGET, MAX_PER_TEAM } from '../../components/fantasy/types';
 import type { Role, DraftProps } from '../../components/fantasy/types';
 import type { IKLPlayer } from '../../api/fantasy';
@@ -290,6 +290,34 @@ export function MobileDraftPage({
                   className="ml-auto text-gray-600 hover:text-white text-xs font-bold">
                   Got it
                 </button>
+              </div>
+            )}
+
+            {/* Floating draft summary — always visible context */}
+            {filledCount > 0 && (
+              <div className="sticky top-0 z-10 flex items-center justify-between gap-2 px-3 py-2 rounded-xl -mx-1"
+                style={{ background: '#07090fee', backdropFilter: 'blur(8px)', border: '1px solid rgba(245,158,11,0.15)' }}>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-black text-amber-400">{filledCount}/5</span>
+                  <div className="flex gap-0.5">
+                    {ROLES.map(r => (
+                      <div key={r} className="w-4 h-1.5 rounded-full"
+                        style={{ background: picks[r] ? ROLE_META[r].color : 'rgba(255,255,255,0.1)' }} />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`text-xs font-black ${budgetLeft < 10 ? 'text-red-400' : 'text-white'}`}>
+                    {budgetLeft} cr
+                  </span>
+                  {filledCount === 5 && (
+                    <button onClick={onSave} disabled={saving}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black text-black"
+                      style={{ background: 'linear-gradient(90deg,#FBBF24,#F59E0B)' }}>
+                      <Save className="w-3 h-3" /> Save
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 

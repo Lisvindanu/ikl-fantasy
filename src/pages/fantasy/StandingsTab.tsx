@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, Crown, Medal, Star, Trophy, Flame, Info, Zap, Newspaper } from 'lucide-react';
+import { TrendingUp, Crown, Medal, Star, Trophy, Flame, Info, Zap, Newspaper, Users, Shield, Swords, Target, ChevronRight } from 'lucide-react';
 import { RolePill } from '../../components/fantasy/RolePill';
 import type { Role } from '../../components/fantasy/types';
 import type { IKLSeason, IKLTeam, IKLPlayer, PlayerOfTheWeek, SeasonRecords, TeamStanding, PlayerNews } from '../../api/fantasy';
@@ -11,6 +11,15 @@ interface Props {
   sortedByPts: IKLPlayer[];
   maxPts: number;
   onDetail: (p: IKLPlayer) => void;
+  // Action card navigation
+  onGoToDraft?: () => void;
+  onGoToTeam?: () => void;
+  onGoToMatches?: () => void;
+  onGoToPredictions?: () => void;
+  activeMode?: 'player' | 'team' | 'both' | null;
+  hasDraftPicks?: boolean;
+  hasTeamPick?: boolean;
+  isAuthenticated?: boolean;
 }
 
 function rankColor(rank: number): string {
@@ -26,7 +35,7 @@ function diffDisplay(value: number): { text: string; color: string } {
   return { text: '0', color: '#6B7280' };
 }
 
-export function StandingsTab({ season, sortedByPts, maxPts, onDetail }: Props) {
+export function StandingsTab({ season, sortedByPts, maxPts, onDetail, onGoToDraft, onGoToTeam, onGoToMatches, onGoToPredictions, activeMode, hasDraftPicks, hasTeamPick, isAuthenticated }: Props) {
   const [potw, setPotw] = useState<PlayerOfTheWeek | null>(null);
   const [records, setRecords] = useState<SeasonRecords | null>(null);
   const [standings, setStandings] = useState<TeamStanding[]>([]);
@@ -77,6 +86,67 @@ export function StandingsTab({ season, sortedByPts, maxPts, onDetail }: Props) {
                 {potw.total_kills}/{potw.total_deaths}/{potw.total_assists} · {potw.mvp_count} MVP
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* What to do next — action cards */}
+      {isAuthenticated && (
+        <div>
+          <h2 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
+            <Target className="w-4 h-4 text-amber-400" /> Yang Bisa Kamu Lakukan
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {(activeMode === 'player' || activeMode === 'both') && !hasDraftPicks && onGoToDraft && (
+              <button onClick={onGoToDraft}
+                className="rounded-xl p-3 text-left group transition-all hover:border-amber-500/30"
+                style={{ background: '#0d1017', border: '1px solid rgba(245,158,11,0.15)' }}>
+                <Users className="w-5 h-5 text-amber-400 mb-2" />
+                <div className="text-white font-bold text-xs">Draft Pemain</div>
+                <div className="text-gray-600 text-[10px] mt-0.5">Belum ada lineup</div>
+                <ChevronRight className="w-3.5 h-3.5 text-amber-400/60 mt-1" />
+              </button>
+            )}
+            {(activeMode === 'player' || activeMode === 'both') && hasDraftPicks && onGoToDraft && (
+              <button onClick={onGoToDraft}
+                className="rounded-xl p-3 text-left group transition-all hover:border-green-500/30"
+                style={{ background: '#0d1017', border: '1px solid rgba(34,197,94,0.15)' }}>
+                <Users className="w-5 h-5 text-green-400 mb-2" />
+                <div className="text-white font-bold text-xs">Edit Lineup</div>
+                <div className="text-gray-600 text-[10px] mt-0.5">Ubah formasi</div>
+                <ChevronRight className="w-3.5 h-3.5 text-green-400/60 mt-1" />
+              </button>
+            )}
+            {(activeMode === 'team' || activeMode === 'both') && !hasTeamPick && onGoToTeam && (
+              <button onClick={onGoToTeam}
+                className="rounded-xl p-3 text-left group transition-all hover:border-purple-500/30"
+                style={{ background: '#0d1017', border: '1px solid rgba(168,85,247,0.15)' }}>
+                <Shield className="w-5 h-5 text-purple-400 mb-2" />
+                <div className="text-white font-bold text-xs">Pilih Tim</div>
+                <div className="text-gray-600 text-[10px] mt-0.5">Belum pilih tim</div>
+                <ChevronRight className="w-3.5 h-3.5 text-purple-400/60 mt-1" />
+              </button>
+            )}
+            {onGoToMatches && (
+              <button onClick={onGoToMatches}
+                className="rounded-xl p-3 text-left group transition-all hover:border-white/15"
+                style={{ background: '#0d1017', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <Swords className="w-5 h-5 text-blue-400 mb-2" />
+                <div className="text-white font-bold text-xs">Lihat Pertandingan</div>
+                <div className="text-gray-600 text-[10px] mt-0.5">Jadwal & hasil</div>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-600 mt-1" />
+              </button>
+            )}
+            {onGoToPredictions && (
+              <button onClick={onGoToPredictions}
+                className="rounded-xl p-3 text-left group transition-all hover:border-white/15"
+                style={{ background: '#0d1017', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <Target className="w-5 h-5 text-emerald-400 mb-2" />
+                <div className="text-white font-bold text-xs">Prediksi Match</div>
+                <div className="text-gray-600 text-[10px] mt-0.5">Tebak pemenang</div>
+                <ChevronRight className="w-3.5 h-3.5 text-gray-600 mt-1" />
+              </button>
+            )}
           </div>
         </div>
       )}

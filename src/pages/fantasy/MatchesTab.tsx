@@ -1,19 +1,23 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Swords, Trophy, Radio } from 'lucide-react';
-import type { IKLMatch } from '../../api/fantasy';
+import { Swords, Trophy, Radio, Target, Zap } from 'lucide-react';
+import type { IKLMatch, IKLPlayer } from '../../api/fantasy';
 import { getMatches } from '../../api/fantasy';
 import { MatchCard, STAGE_LABEL } from './MatchCard';
 import { PlayoffBracket } from './PlayoffBracket';
+import { PredictionCard } from './PredictionCard';
 
 interface Props {
   matches: IKLMatch[];
   loading: boolean;
   seasonId?: number;
+  // Predictions integration
+  players?: IKLPlayer[];
+  isAuthenticated?: boolean;
 }
 
 const POLL_INTERVAL = 30_000; // 30 seconds
 
-export function MatchesTab({ matches: initialMatches, loading, seasonId }: Props) {
+export function MatchesTab({ matches: initialMatches, loading, seasonId, players = [], isAuthenticated = false }: Props) {
   const [matches, setMatches] = useState(initialMatches);
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -110,6 +114,29 @@ export function MatchesTab({ matches: initialMatches, loading, seasonId }: Props
         </h3>
         <PlayoffBracket matches={matches} />
       </div>
+
+      {/* Inline predictions for upcoming matches */}
+      {isAuthenticated && (() => {
+        const upcoming = matches.filter(m => m.status === 'upcoming');
+        if (upcoming.length === 0) return null;
+        return (
+          <div>
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-600 mb-3 flex items-center gap-2">
+              <Target className="w-3.5 h-3.5 text-green-400" />
+              Prediksi Match Mendatang
+              <span className="ml-auto flex items-center gap-2 text-[10px] text-gray-700 font-bold normal-case tracking-normal">
+                <span className="flex items-center gap-0.5"><Target className="w-3 h-3 text-green-400" />Winner 3pts</span>
+                <span className="flex items-center gap-0.5"><Zap className="w-3 h-3 text-amber-400" />Score 5pts</span>
+              </span>
+            </h3>
+            <div className="space-y-3">
+              {upcoming.slice(0, 5).map(match => (
+                <PredictionCard key={`pred-${match.id}`} match={match} players={players} />
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Match list by week */}
       {Object.entries(byWeek)
