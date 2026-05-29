@@ -1,32 +1,184 @@
 import { useState, useMemo } from 'react';
-import { Search, ArrowUpDown, ArrowUp, ArrowDown, Trophy, Users, Filter, Pencil, Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { AdminPanel, Input } from './shared';
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Trophy, Users, Filter, Pencil, X, ChevronLeft, ChevronRight, Save, ImagePlus } from 'lucide-react';
+import { AdminPanel, Input, Field } from './shared';
 import * as fantasyApi from '../../api/fantasy';
 import type { IKLPlayer } from '../../api/fantasy';
 
 type SortKey = 'name' | 'role' | 'team_short' | 'price' | 'fantasy_pts' | 'mvps';
 type SortDir = 'asc' | 'desc';
 const PAGE_SIZE = 15;
-
 const ROLES = ['all', 'EXP', 'JGL', 'MID', 'GOLD', 'ROAM'] as const;
 const ROLE_COLOR: Record<string, string> = {
   JGL: '#22C55E', MID: '#3B82F6', GOLD: '#F59E0B', EXP: '#A855F7', ROAM: '#06B6D4',
 };
 
-function SortIcon({ field, activeField, direction }: { field: SortKey; activeField: SortKey; direction: SortDir }) {
-  if (field !== activeField) return <ArrowUpDown className="w-2.5 h-2.5 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity" />;
-  const Icon = direction === 'asc' ? ArrowUp : ArrowDown;
-  return <Icon className="w-2.5 h-2.5 text-amber-400" />;
+function SortIcon({ field, active, dir }: { field: SortKey; active: SortKey; dir: SortDir }) {
+  if (field !== active) return <ArrowUpDown className="w-2.5 h-2.5 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity" />;
+  const I = dir === 'asc' ? ArrowUp : ArrowDown;
+  return <I className="w-2.5 h-2.5 text-amber-400" />;
 }
 
-interface EditState {
-  id: number;
-  name: string;
-  role: string;
-  price: number;
-  mvps: number;
-  fantasyPts: number;
+function PlayerAvatar({ player, size = 'sm' }: { player: IKLPlayer; size?: 'sm' | 'lg' }) {
+  const s = size === 'lg' ? 'w-16 h-16 rounded-xl text-lg' : 'w-6 h-6 rounded text-[8px]';
+  if (player.photo_url) {
+    return <img src={player.photo_url} alt={player.name}
+      className={`${s} object-cover flex-shrink-0`}
+      style={{ border: `1px solid ${player.team_color}40` }} />;
+  }
+  return (
+    <div className={`${s} flex items-center justify-center font-black flex-shrink-0`}
+      style={{ background: `${player.team_color}20`, color: player.team_color }}>
+      {player.name.slice(0, 2).toUpperCase()}
+    </div>
+  );
 }
+
+/* ── Edit Modal ───────────────────────────────────────────────────────────── */
+
+interface EditForm {
+  name: string; role: string; nationality: string;
+  price: number; mvps: number; fantasyPts: number; photoUrl: string;
+}
+
+function EditModal({ player, onClose, onSaved }: {
+  player: IKLPlayer; onClose: () => void; onSaved: () => void;
+}) {
+  const [form, setForm] = useState<EditForm>({
+    name: player.name, role: player.role, nationality: player.nationality || '',
+    price: player.price, mvps: player.mvps, fantasyPts: player.fantasy_pts,
+    photoUrl: player.photo_url || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const patch = (k: keyof EditForm, v: string | number) => setForm(f => ({ ...f, [k]: v }));
+
+  async function handleSave() {
+    setSaving(true); setMsg('');
+    try {
+      await fantasyApi.adminUpdatePlayer(player.id, {
+        name: form.name, role: form.role, nationality: form.nationality || undefined,
+        price: form.price, mvps: form.mvps, fantasyPts: form.fantasyPts,
+        photoUrl: form.photoUrl,
+      });
+      onSaved();
+      onClose();
+    } catch (e) { setMsg(e instanceof Error ? e.message : 'Failed to save'); }
+    setSaving(false);
+  }
+
+  const roleColor = ROLE_COLOR[form.role] ?? '#6B7280';
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-md rounded-2xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(13,16,23,0.98) 0%, rgba(7,9,15,0.99) 100%)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+        }}>
+        <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)' }} />
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center gap-3">
+            <PlayerAvatar player={{ ...player, photo_url: form.photoUrl || player.photo_url } as IKLPlayer} size="lg" />
+            <div>
+              <h3 className="text-sm font-black text-white">{player.name}</h3>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded"
+                  style={{ background: `${roleColor}15`, color: roleColor }}>{form.role}</span>
+                <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded"
+                  style={{ background: `${player.team_color}15`, color: player.team_color }}>{player.team_short}</span>
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <div className="px-5 py-4 space-y-3">
+          {/* Photo URL */}
+          <Field label="Photo URL">
+            <div className="relative">
+              <ImagePlus className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 pointer-events-none" />
+              <Input value={form.photoUrl} onChange={e => patch('photoUrl', e.target.value)}
+                placeholder="https://..." className="w-full pl-9 !text-xs" />
+            </div>
+          </Field>
+
+          {/* Name + Nationality */}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Name">
+              <Input value={form.name} onChange={e => patch('name', e.target.value)} className="w-full !text-xs" />
+            </Field>
+            <Field label="Nationality">
+              <Input value={form.nationality} onChange={e => patch('nationality', e.target.value)}
+                placeholder="ID" className="w-full !text-xs" />
+            </Field>
+          </div>
+
+          {/* Role + Price */}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Role">
+              <select value={form.role} onChange={e => patch('role', e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl text-white text-xs font-medium outline-none appearance-none cursor-pointer"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2))',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}>
+                {['EXP', 'JGL', 'MID', 'GOLD', 'ROAM'].map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </Field>
+            <Field label="Price (M)">
+              <Input type="number" min={5} max={50} value={form.price}
+                onChange={e => patch('price', Number(e.target.value))} className="w-full !text-xs" />
+            </Field>
+          </div>
+
+          {/* Points + MVPs */}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Fantasy Pts">
+              <Input type="number" min={0} max={999} value={form.fantasyPts}
+                onChange={e => patch('fantasyPts', Number(e.target.value))} className="w-full !text-xs" />
+            </Field>
+            <Field label="MVPs">
+              <Input type="number" min={0} max={99} value={form.mvps}
+                onChange={e => patch('mvps', Number(e.target.value))} className="w-full !text-xs" />
+            </Field>
+          </div>
+
+          {msg && (
+            <p className="text-xs font-bold text-red-400 px-2.5 py-1.5 rounded-lg bg-red-500/5 border border-red-500/10">{msg}</p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-4 flex justify-end gap-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <button onClick={onClose}
+            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition-colors"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            Cancel
+          </button>
+          <button onClick={handleSave} disabled={saving}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black text-black disabled:opacity-50 transition-all hover:brightness-110"
+            style={{ background: 'linear-gradient(135deg, #FBBF24, #D97706)', boxShadow: '0 2px 8px rgba(245,158,11,0.25)' }}>
+            <Save className="w-3 h-3" />
+            {saving ? 'Saving...' : 'Save'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Players Panel ────────────────────────────────────────────────────────── */
 
 export function PlayersPanel({ players, onRefresh }: { players: IKLPlayer[]; onRefresh: () => void }) {
   const [search, setSearch] = useState('');
@@ -34,9 +186,7 @@ export function PlayersPanel({ players, onRefresh }: { players: IKLPlayer[]; onR
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [page, setPage] = useState(0);
-  const [editing, setEditing] = useState<EditState | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState('');
+  const [editPlayer, setEditPlayer] = useState<IKLPlayer | null>(null);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
@@ -63,33 +213,13 @@ export function PlayersPanel({ players, onRefresh }: { players: IKLPlayer[]; onR
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
-  function startEdit(p: IKLPlayer) {
-    setEditing({ id: p.id, name: p.name, role: p.role, price: p.price, mvps: p.mvps, fantasyPts: p.fantasy_pts });
-    setMsg('');
-  }
-
-  async function saveEdit() {
-    if (!editing) return;
-    setSaving(true); setMsg('');
-    try {
-      await fantasyApi.adminUpdatePlayer(editing.id, {
-        name: editing.name, role: editing.role, price: editing.price,
-        mvps: editing.mvps, fantasyPts: editing.fantasyPts,
-      });
-      setMsg('Saved');
-      setEditing(null);
-      onRefresh();
-    } catch (e) { setMsg(e instanceof Error ? e.message : 'Failed'); }
-    setSaving(false);
-  }
-
-  const columns: { label: string; field: SortKey; align?: string }[] = [
+  const columns: { label: string; field: SortKey; right?: boolean }[] = [
     { label: 'Player', field: 'name' },
     { label: 'Role', field: 'role' },
     { label: 'Team', field: 'team_short' },
-    { label: 'Price', field: 'price', align: 'right' },
-    { label: 'Pts', field: 'fantasy_pts', align: 'right' },
-    { label: 'MVP', field: 'mvps', align: 'right' },
+    { label: 'Price', field: 'price', right: true },
+    { label: 'Pts', field: 'fantasy_pts', right: true },
+    { label: 'MVP', field: 'mvps', right: true },
   ];
 
   return (
@@ -140,12 +270,6 @@ export function PlayersPanel({ players, onRefresh }: { players: IKLPlayer[]; onR
         )}
       </div>
 
-      {msg && (
-        <p className={`text-[10px] font-bold px-2.5 py-1.5 rounded-lg ${msg === 'Saved' ? 'text-green-400 bg-green-500/5 border border-green-500/10' : 'text-red-400 bg-red-500/5 border border-red-500/10'}`}>
-          {msg}
-        </p>
-      )}
-
       {/* Table */}
       <AdminPanel>
         <div className="overflow-x-auto">
@@ -155,10 +279,10 @@ export function PlayersPanel({ players, onRefresh }: { players: IKLPlayer[]; onR
                 <th className="w-8 px-2 py-2 text-gray-700 text-[9px] font-black uppercase">#</th>
                 {columns.map(col => (
                   <th key={col.field} onClick={() => toggleSort(col.field)}
-                    className={`group px-2 py-2 cursor-pointer select-none hover:bg-white/[0.02] ${col.align === 'right' ? 'text-right' : 'text-left'}`}>
+                    className={`group px-2 py-2 cursor-pointer select-none hover:bg-white/[0.02] ${col.right ? 'text-right' : 'text-left'}`}>
                     <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-gray-600 group-hover:text-gray-400">
                       {col.label}
-                      <SortIcon field={col.field} activeField={sortKey} direction={sortDir} />
+                      <SortIcon field={col.field} active={sortKey} dir={sortDir} />
                     </span>
                   </th>
                 ))}
@@ -170,104 +294,42 @@ export function PlayersPanel({ players, onRefresh }: { players: IKLPlayer[]; onR
                 <tr><td colSpan={8} className="text-center py-8 text-gray-600 text-xs">No players found</td></tr>
               ) : paginated.map((p, i) => {
                 const roleColor = ROLE_COLOR[p.role] ?? '#6B7280';
-                const isEditing = editing?.id === p.id;
-                const globalIdx = page * PAGE_SIZE + i + 1;
-
                 return (
-                  <tr key={p.id} className="border-t hover:bg-white/[0.015] transition-colors"
-                    style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
-                    <td className="px-2 py-1.5 text-gray-700 text-[10px] font-bold tabular-nums">{globalIdx}</td>
-
-                    {/* Name */}
+                  <tr key={p.id} className="border-t hover:bg-white/[0.015] transition-colors cursor-pointer"
+                    style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+                    onClick={() => setEditPlayer(p)}>
+                    <td className="px-2 py-1.5 text-gray-700 text-[10px] font-bold tabular-nums">{page * PAGE_SIZE + i + 1}</td>
                     <td className="px-2 py-1.5">
-                      {isEditing ? (
-                        <input value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })}
-                          className="w-full bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-white text-xs outline-none focus:border-amber-500/40" />
-                      ) : (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded flex-shrink-0 text-[8px] font-black flex items-center justify-center"
-                            style={{ background: `${p.team_color}20`, color: p.team_color }}>
-                            {p.name.slice(0, 2).toUpperCase()}
-                          </div>
-                          <span className="font-bold text-white text-xs truncate max-w-[100px]">{p.name}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        <PlayerAvatar player={p} />
+                        <span className="font-bold text-white text-xs truncate max-w-[100px]">{p.name}</span>
+                      </div>
                     </td>
-
-                    {/* Role */}
                     <td className="px-2 py-1.5">
-                      {isEditing ? (
-                        <select value={editing.role} onChange={e => setEditing({ ...editing, role: e.target.value })}
-                          className="bg-white/5 border border-white/10 rounded px-1 py-0.5 text-white text-[10px] outline-none">
-                          {['EXP', 'JGL', 'MID', 'GOLD', 'ROAM'].map(r => <option key={r} value={r}>{r}</option>)}
-                        </select>
-                      ) : (
-                        <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded"
-                          style={{ background: `${roleColor}12`, color: roleColor }}>{p.role}</span>
-                      )}
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded"
+                        style={{ background: `${roleColor}12`, color: roleColor }}>{p.role}</span>
                     </td>
-
-                    {/* Team */}
                     <td className="px-2 py-1.5">
                       <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded"
                         style={{ background: `${p.team_color}15`, color: p.team_color }}>{p.team_short}</span>
                     </td>
-
-                    {/* Price */}
+                    <td className="px-2 py-1.5 text-right text-gray-400 font-bold tabular-nums text-[11px]">{p.price}M</td>
                     <td className="px-2 py-1.5 text-right">
-                      {isEditing ? (
-                        <input type="number" min={5} max={50} value={editing.price}
-                          onChange={e => setEditing({ ...editing, price: Number(e.target.value) })}
-                          className="w-12 text-right bg-white/5 border border-white/10 rounded px-1 py-0.5 text-white text-xs outline-none focus:border-amber-500/40" />
-                      ) : (
-                        <span className="text-gray-400 font-bold tabular-nums text-[11px]">{p.price}M</span>
-                      )}
+                      <span className="font-black tabular-nums text-[11px]"
+                        style={{ color: p.fantasy_pts > 0 ? '#22C55E' : '#374151' }}>{p.fantasy_pts.toFixed(1)}</span>
                     </td>
-
-                    {/* Points */}
                     <td className="px-2 py-1.5 text-right">
-                      {isEditing ? (
-                        <input type="number" min={0} max={999} value={editing.fantasyPts}
-                          onChange={e => setEditing({ ...editing, fantasyPts: Number(e.target.value) })}
-                          className="w-14 text-right bg-white/5 border border-white/10 rounded px-1 py-0.5 text-white text-xs outline-none focus:border-green-500/40" />
-                      ) : (
-                        <span className="font-black tabular-nums text-[11px]"
-                          style={{ color: p.fantasy_pts > 0 ? '#22C55E' : '#374151' }}>{p.fantasy_pts.toFixed(1)}</span>
-                      )}
-                    </td>
-
-                    {/* MVPs */}
-                    <td className="px-2 py-1.5 text-right">
-                      {isEditing ? (
-                        <input type="number" min={0} max={99} value={editing.mvps}
-                          onChange={e => setEditing({ ...editing, mvps: Number(e.target.value) })}
-                          className="w-10 text-right bg-white/5 border border-white/10 rounded px-1 py-0.5 text-white text-xs outline-none focus:border-amber-500/40" />
-                      ) : p.mvps > 0 ? (
+                      {p.mvps > 0 ? (
                         <span className="inline-flex items-center gap-0.5 text-amber-400 font-bold text-[10px] tabular-nums">
                           <Trophy className="w-2.5 h-2.5" />{p.mvps}
                         </span>
                       ) : <span className="text-gray-700 text-[10px]">0</span>}
                     </td>
-
-                    {/* Actions */}
-                    <td className="px-2 py-1.5">
-                      {isEditing ? (
-                        <div className="flex gap-0.5">
-                          <button onClick={saveEdit} disabled={saving}
-                            className="p-1 rounded hover:bg-green-500/10 text-green-400 transition-colors disabled:opacity-50">
-                            <Check className="w-3 h-3" />
-                          </button>
-                          <button onClick={() => setEditing(null)}
-                            className="p-1 rounded hover:bg-red-500/10 text-gray-500 hover:text-red-400 transition-colors">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button onClick={() => startEdit(p)}
-                          className="p-1 rounded hover:bg-white/5 text-gray-700 hover:text-amber-400 transition-colors">
-                          <Pencil className="w-3 h-3" />
-                        </button>
-                      )}
+                    <td className="px-2 py-1.5" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => setEditPlayer(p)}
+                        className="p-1 rounded hover:bg-white/5 text-gray-700 hover:text-amber-400 transition-colors">
+                        <Pencil className="w-3 h-3" />
+                      </button>
                     </td>
                   </tr>
                 );
@@ -276,6 +338,11 @@ export function PlayersPanel({ players, onRefresh }: { players: IKLPlayer[]; onR
           </table>
         </div>
       </AdminPanel>
+
+      {/* Edit Modal */}
+      {editPlayer && (
+        <EditModal player={editPlayer} onClose={() => setEditPlayer(null)} onSaved={onRefresh} />
+      )}
     </div>
   );
 }

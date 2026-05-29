@@ -202,7 +202,7 @@ export async function adminUpdatePrices(seasonId: number): Promise<{ updated: nu
 
 export async function adminUpdatePlayer(playerId: number, data: {
   name?: string; role?: string; nationality?: string; price?: number;
-  mvps?: number; fantasyPts?: number;
+  mvps?: number; fantasyPts?: number; photoUrl?: string;
 }): Promise<void> {
   const r = await apiFetch(`${API}/api/fantasy/admin/players/${playerId}`, {
     method: 'PUT',
