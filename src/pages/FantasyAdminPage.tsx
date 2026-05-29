@@ -161,14 +161,14 @@ export function FantasyAdminPage() {
       <div className="flex min-h-screen">
 
         {/* Sidebar */}
-        <aside className="hidden lg:flex flex-col w-[240px] flex-shrink-0 sticky top-0 h-screen"
+        <aside className="hidden lg:flex flex-col w-[240px] flex-shrink-0 sticky top-0 h-screen overflow-visible"
           style={{
             background: 'linear-gradient(180deg, #0c0f18 0%, #080a11 100%)',
             borderRight: '1px solid rgba(255,255,255,0.04)',
           }}>
 
           {/* Logo area */}
-          <div className="px-5 pt-6 pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="px-5 pt-6 pb-5 overflow-visible relative z-20" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center relative"
                 style={{
