@@ -13,8 +13,6 @@ interface LeagueCardProps {
 export function LeagueCard({ league, onOpen, currentUserId, onDelete, onLeave }: LeagueCardProps) {
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [confirmLeave, setConfirmLeave] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isCreator = currentUserId === league.creator_id;
@@ -23,8 +21,6 @@ export function LeagueCard({ league, onOpen, currentUserId, onDelete, onLeave }:
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
-        setConfirmDelete(false);
-        setConfirmLeave(false);
       }
     }
     if (menuOpen) document.addEventListener('mousedown', handleClick);
@@ -53,24 +49,16 @@ export function LeagueCard({ league, onOpen, currentUserId, onDelete, onLeave }:
 
   function handleDeleteClick(e: React.MouseEvent) {
     e.stopPropagation();
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      return;
-    }
+    if (!window.confirm('Yakin hapus liga ini? Semua data liga akan hilang.')) return;
     onDelete?.(league.id);
     setMenuOpen(false);
-    setConfirmDelete(false);
   }
 
   function handleLeaveClick(e: React.MouseEvent) {
     e.stopPropagation();
-    if (!confirmLeave) {
-      setConfirmLeave(true);
-      return;
-    }
+    if (!window.confirm('Yakin keluar dari liga ini?')) return;
     onLeave?.(league.id);
     setMenuOpen(false);
-    setConfirmLeave(false);
   }
 
   return (
@@ -97,38 +85,36 @@ export function LeagueCard({ league, onOpen, currentUserId, onDelete, onLeave }:
           </button>
           {/* Kebab menu */}
           <div className="relative flex-shrink-0" ref={menuRef}>
-            <button onClick={(e) => { e.stopPropagation(); setMenuOpen(v => !v); setConfirmDelete(false); setConfirmLeave(false); }}
+            <button onClick={(e) => { e.stopPropagation(); setMenuOpen(v => !v); }}
               className="p-1.5 rounded-lg text-gray-600 hover:text-white hover:bg-white/10 transition-colors">
               <MoreVertical className="w-4 h-4" />
             </button>
+            {/* Dropdown menu — inside menuRef so click-outside works */}
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-1 w-44 rounded-xl py-1 shadow-2xl z-20"
+                style={{ background: '#1a1d24', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <button onClick={shareLeague}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+                  <Share2 className="w-4 h-4" /> Share
+                </button>
+                {isCreator ? (
+                  <button onClick={handleDeleteClick}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                    Hapus Liga
+                  </button>
+                ) : (
+                  <button onClick={handleLeaveClick}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors">
+                    <LogOut className="w-4 h-4" />
+                    Keluar Liga
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </button>
-
-      {/* Dropdown menu */}
-      {menuOpen && (
-        <div className="absolute right-3 top-14 w-44 rounded-xl py-1 shadow-2xl z-20"
-          style={{ background: '#1a1d24', border: '1px solid rgba(255,255,255,0.12)' }}
-          ref={menuRef}>
-          <button onClick={shareLeague}
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
-            <Share2 className="w-4 h-4" /> Share
-          </button>
-          {isCreator ? (
-            <button onClick={handleDeleteClick}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors">
-              <Trash2 className="w-4 h-4" />
-              {confirmDelete ? 'Yakin hapus?' : 'Hapus Liga'}
-            </button>
-          ) : (
-            <button onClick={handleLeaveClick}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors">
-              <LogOut className="w-4 h-4" />
-              {confirmLeave ? 'Yakin keluar?' : 'Keluar Liga'}
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }
