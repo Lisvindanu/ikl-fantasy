@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import {
   RefreshCw, Download, Mail, DollarSign, Target,
-  Database, AlertTriangle, ScrollText, Wrench,
+  Database, AlertTriangle, Terminal,
 } from 'lucide-react';
 import * as fantasyApi from '../../api/fantasy';
 import type { AdminSectionProps } from './adminConstants';
 import { AdminPanel } from './shared';
 import { GradePredictionsPanel } from './GradePredictionsPanel';
 import { AuditLogPanel } from './AuditLogPanel';
-
-// ── Main section ─────────────────────────────────────────────────────────────
 
 export function ToolsSection({ season, matches, onRefreshMatches, onSetPlayers, onSetAllSeasons, onSetSelectedSeasonId }: AdminSectionProps) {
   const [recalculating, setRecalculating] = useState(false);
@@ -83,13 +81,13 @@ export function ToolsSection({ season, matches, onRefreshMatches, onSetPlayers, 
   }
 
   return (
-    <div className="space-y-5">
-      {/* Section header */}
+    <div className="space-y-4">
+      {/* ── Command Deck header ──────────────────────────────────────── */}
       <AdminPanel>
         <div className="px-5 py-4 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.15)' }}>
-            <Wrench className="w-4 h-4 text-amber-500" />
+            style={{ background: 'linear-gradient(135deg, #FBBF24, #D97706)', boxShadow: '0 2px 12px rgba(245,158,11,0.3)' }}>
+            <Terminal className="w-4 h-4 text-black" />
           </div>
           <div>
             <h2 className="text-sm font-black text-white tracking-tight">Command Deck</h2>
@@ -98,199 +96,198 @@ export function ToolsSection({ season, matches, onRefreshMatches, onSetPlayers, 
         </div>
       </AdminPanel>
 
-      {/* Update Dynamic Prices */}
-      <ToolCard
-        icon={<DollarSign className="w-4 h-4" />}
-        iconColor="#22C55E"
-        title="Update Player Prices"
-        description="Recalculate dynamic player prices based on performance. Higher-performing players become more expensive."
-      >
-        <StatusMsg msg={priceMsg} successWord="updated" />
-        <ActionBtn
-          onClick={handleUpdatePrices}
-          disabled={updatingPrices}
-          color="#22C55E"
-          icon={<DollarSign className="w-3.5 h-3.5" />}
-        >
-          {updatingPrices ? 'Updating...' : 'Update Prices'}
-        </ActionBtn>
-      </ToolCard>
-
-      {/* Grade Predictions */}
-      <ToolCard
-        icon={<Target className="w-4 h-4" />}
-        iconColor="#A855F7"
-        title="Grade Predictions"
-        description="Grade predictions for completed matches. Select a match below to grade its predictions."
-      >
-        <GradePredictionsPanel matches={matches} onGraded={onRefreshMatches} />
-      </ToolCard>
-
-      {/* Weekly Recap Email */}
-      <ToolCard
-        icon={<Mail className="w-4 h-4" />}
-        iconColor="#3B82F6"
-        title="Weekly Recap Email"
-        description="Send a weekly recap email to all fantasy participants with their rank, points, top performer, and recent results."
-      >
-        <StatusMsg msg={recapMsg} successWord="sent" />
-        {showRecapConfirm ? (
-          <div className="flex items-center gap-3">
-            <span className="text-amber-400 text-xs font-bold">Send recap to all participants?</span>
-            <button
-              onClick={handleSendRecap}
-              disabled={sendingRecap}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-white disabled:opacity-50 transition-all hover:brightness-110 active:scale-[0.98]"
-              style={{
-                background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
-                boxShadow: '0 2px 8px rgba(59,130,246,0.3)',
-              }}
-            >
-              {sendingRecap ? 'Sending...' : 'Yes, Send'}
-            </button>
-            <button
-              onClick={() => setShowRecapConfirm(false)}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-white transition-colors"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <ActionBtn
-            onClick={() => setShowRecapConfirm(true)}
-            disabled={sendingRecap}
-            color="#3B82F6"
-            icon={<Mail className="w-3.5 h-3.5" />}
-          >
-            {sendingRecap ? 'Sending...' : 'Send Weekly Recap'}
-          </ActionBtn>
-        )}
-      </ToolCard>
-
-      {/* Export */}
-      <ToolCard
-        icon={<Download className="w-4 h-4" />}
-        iconColor="#22C55E"
-        title="Export Data"
-        description="Download all season data as JSON including matches, stats, leaderboard, and players."
-      >
-        <a
-          href={fantasyApi.getExportUrl(season.id)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:brightness-110 active:scale-[0.98]"
-          style={{
-            background: 'linear-gradient(180deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.06) 100%)',
-            color: '#86EFAC',
-            border: '1px solid rgba(34,197,94,0.18)',
-            boxShadow: '0 0 12px rgba(34,197,94,0.06)',
-          }}
-        >
-          <Download className="w-3.5 h-3.5" /> Export Season Data
-        </a>
-      </ToolCard>
-
-      {/* Recalculate */}
-      <ToolCard
-        icon={<RefreshCw className="w-4 h-4" />}
-        iconColor="#F59E0B"
-        title="Recalculate Points"
-        description="Recalculate all fantasy points, player totals, and leaderboard rankings from match stats."
-      >
-        <StatusMsg msg={recalcMsg} successWord="done" />
-        <button
+      {/* ── Quick Actions — 2-col grid ───────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Recalculate Points */}
+        <QuickAction
+          icon={<RefreshCw className={`w-4 h-4 ${recalculating ? 'animate-spin' : ''}`} />}
+          color="#F59E0B"
+          title="Recalculate Points"
+          sub="Rebuild all pts + leaderboard"
+          btnLabel={recalculating ? 'Running...' : 'Recalculate'}
           onClick={handleRecalculate}
           disabled={recalculating}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-black disabled:opacity-50 transition-all hover:brightness-110 active:scale-[0.98]"
-          style={{
-            background: 'linear-gradient(135deg, #FBBF24 0%, #D97706 100%)',
-            boxShadow: '0 4px 12px rgba(245,158,11,0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
-          }}
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${recalculating ? 'animate-spin' : ''}`} />
-          {recalculating ? 'Recalculating...' : 'Recalculate All'}
-        </button>
-      </ToolCard>
+          msg={recalcMsg}
+          msgOk="done"
+          primary
+        />
 
-      {/* Seed IKL Data */}
-      <ToolCard
-        icon={<Database className="w-4 h-4" />}
-        iconColor="#F97316"
-        title="Seed IKL Data"
-        description="Create a new season with IKL Spring 2026 teams and players data. Use this to initialize a fresh season."
-      >
-        <div
-          className="flex items-center gap-2.5 mb-3 px-3.5 py-2.5 rounded-xl"
-          style={{
-            background: 'linear-gradient(180deg, rgba(245,158,11,0.06) 0%, rgba(245,158,11,0.02) 100%)',
-            border: '1px solid rgba(245,158,11,0.1)',
-          }}
-        >
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-          <span className="text-amber-500/80 text-xs font-bold">
-            This creates a new season. Make sure you haven't already seeded.
-          </span>
+        {/* Update Player Prices */}
+        <QuickAction
+          icon={<DollarSign className="w-4 h-4" />}
+          color="#22C55E"
+          title="Update Prices"
+          sub="Performance-based price adjust"
+          btnLabel={updatingPrices ? 'Updating...' : 'Update'}
+          onClick={handleUpdatePrices}
+          disabled={updatingPrices}
+          msg={priceMsg}
+          msgOk="updated"
+        />
+
+        {/* Export Data */}
+        <QuickAction
+          icon={<Download className="w-4 h-4" />}
+          color="#3B82F6"
+          title="Export Data"
+          sub="Download season JSON dump"
+          href={fantasyApi.getExportUrl(season.id)}
+        />
+
+        {/* Weekly Recap */}
+        {showRecapConfirm ? (
+          <AdminPanel className="p-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(59,130,246,0.12)', color: '#3B82F6' }}>
+                  <Mail className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold text-amber-400">Send to all participants?</span>
+              </div>
+              <StatusMsg msg={recapMsg} successWord="sent" />
+              <div className="flex gap-2">
+                <button onClick={handleSendRecap} disabled={sendingRecap}
+                  className="flex-1 py-2 rounded-xl text-xs font-black text-black disabled:opacity-50 transition-all"
+                  style={{ background: 'linear-gradient(135deg, #3B82F6, #2563EB)' }}>
+                  {sendingRecap ? 'Sending...' : 'Yes, Send'}
+                </button>
+                <button onClick={() => setShowRecapConfirm(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-white transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </AdminPanel>
+        ) : (
+          <QuickAction
+            icon={<Mail className="w-4 h-4" />}
+            color="#8B5CF6"
+            title="Weekly Recap"
+            sub="Email all participants"
+            btnLabel={sendingRecap ? 'Sending...' : 'Send Recap'}
+            onClick={() => setShowRecapConfirm(true)}
+            disabled={sendingRecap}
+            msg={recapMsg}
+            msgOk="sent"
+          />
+        )}
+      </div>
+
+      {/* ── Grade Predictions ────────────────────────────────────────── */}
+      <AdminPanel className="p-5">
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.2)', color: '#A855F7' }}>
+            <Target className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">Grade Predictions</h3>
+            <p className="text-[10px] text-gray-700">Select a completed match to grade</p>
+          </div>
+        </div>
+        <GradePredictionsPanel matches={matches} onGraded={onRefreshMatches} />
+      </AdminPanel>
+
+      {/* ── Seed IKL Data ────────────────────────────────────────────── */}
+      <AdminPanel className="p-5">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.2)', color: '#F97316' }}>
+              <Database className="w-3.5 h-3.5" />
+            </div>
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">Seed IKL Data</h3>
+              <p className="text-[10px] text-gray-700">Initialize new season with teams + players</p>
+            </div>
+          </div>
+          <ActionBtn onClick={handleSeedIkl} disabled={seeding} color="#F97316"
+            icon={<Database className="w-3 h-3" />}>
+            {seeding ? 'Seeding...' : 'Seed'}
+          </ActionBtn>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
+          style={{ background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.08)' }}>
+          <AlertTriangle className="w-3 h-3 text-amber-500/60 flex-shrink-0" />
+          <span className="text-amber-500/60 text-[10px] font-bold">Creates a new season. Make sure you haven't already seeded.</span>
         </div>
         <StatusMsg msg={seedMsg} successWord="Seeded" />
-        <ActionBtn
-          onClick={handleSeedIkl}
-          disabled={seeding}
-          color="#F97316"
-          icon={<Database className="w-3.5 h-3.5" />}
-        >
-          {seeding ? 'Seeding...' : 'Seed IKL Full'}
-        </ActionBtn>
-      </ToolCard>
+      </AdminPanel>
 
-      {/* Audit Log */}
-      <ToolCard
-        icon={<ScrollText className="w-4 h-4" />}
-        iconColor="#6B7280"
-        title="Audit Log"
-        description="Review recent administrative actions across the system."
-      >
+      {/* ── Audit Log ────────────────────────────────────────────────── */}
+      <AdminPanel className="p-5">
         <AuditLogPanel />
-      </ToolCard>
+      </AdminPanel>
     </div>
   );
 }
 
-// ── ToolCard — uses AdminPanel internally ────────────────────────────────────
+/* ── QuickAction card ────────────────────────────────────────────────────── */
 
-function ToolCard({ icon, iconColor, title, description, children }: {
+function QuickAction({ icon, color, title, sub, btnLabel, onClick, disabled, msg, msgOk, href, primary }: {
   icon: React.ReactNode;
-  iconColor: string;
+  color: string;
   title: string;
-  description: string;
-  children: React.ReactNode;
+  sub: string;
+  btnLabel?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  msg?: string;
+  msgOk?: string;
+  href?: string;
+  primary?: boolean;
 }) {
   return (
-    <AdminPanel>
-      <div className="p-5">
-        <div className="flex items-center gap-2.5 mb-3">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{
-              background: `${iconColor}12`,
-              border: `1px solid ${iconColor}20`,
-              color: iconColor,
-            }}
-          >
-            {icon}
-          </div>
-          <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-500">
-            {title}
-          </h3>
+    <AdminPanel className="p-4">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{
+            background: primary
+              ? `linear-gradient(135deg, ${color}, ${color}CC)`
+              : `${color}14`,
+            border: primary ? 'none' : `1px solid ${color}22`,
+            color: primary ? '#000' : color,
+            boxShadow: primary ? `0 2px 12px ${color}30` : 'none',
+          }}>
+          {icon}
         </div>
-        <p className="text-gray-600 text-xs mb-4 leading-relaxed pl-[38px]">{description}</p>
-        <div className="pl-[38px]">{children}</div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-xs font-black text-white mb-0.5">{title}</h4>
+          <p className="text-[10px] text-gray-600 mb-3">{sub}</p>
+          {msg && msgOk && <StatusMsg msg={msg} successWord={msgOk} />}
+          {href ? (
+            <a href={href} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-bold transition-all hover:brightness-110 active:scale-[0.98]"
+              style={{
+                background: `linear-gradient(180deg, ${color}18 0%, ${color}0A 100%)`,
+                color: `${color}DD`,
+                border: `1px solid ${color}25`,
+              }}>
+              <Download className="w-3 h-3" /> Download JSON
+            </a>
+          ) : btnLabel && onClick ? (
+            <button onClick={onClick} disabled={disabled}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-bold disabled:opacity-50 transition-all hover:brightness-110 active:scale-[0.98]"
+              style={{
+                background: primary
+                  ? `linear-gradient(135deg, ${color}, ${color}CC)`
+                  : `linear-gradient(180deg, ${color}18 0%, ${color}0A 100%)`,
+                color: primary ? '#000' : `${color}DD`,
+                border: primary ? 'none' : `1px solid ${color}25`,
+                boxShadow: primary ? `0 2px 10px ${color}25` : 'none',
+              }}>
+              {btnLabel}
+            </button>
+          ) : null}
+        </div>
       </div>
     </AdminPanel>
   );
 }
 
-// ── ActionBtn ────────────────────────────────────────────────────────────────
+/* ── ActionBtn ───────────────────────────────────────────────────────────── */
 
 function ActionBtn({ children, onClick, disabled, color, icon }: {
   children: React.ReactNode;
@@ -300,44 +297,30 @@ function ActionBtn({ children, onClick, disabled, color, icon }: {
   icon: React.ReactNode;
 }) {
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold disabled:opacity-50 transition-all hover:brightness-110 active:scale-[0.98]"
+    <button onClick={onClick} disabled={disabled}
+      className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-bold disabled:opacity-50 transition-all hover:brightness-110 active:scale-[0.98]"
       style={{
         background: `linear-gradient(180deg, ${color}18 0%, ${color}0A 100%)`,
         color: `${color}CC`,
         border: `1px solid ${color}28`,
-        boxShadow: `0 0 12px ${color}08`,
-      }}
-    >
+      }}>
       {icon}
       {children}
     </button>
   );
 }
 
-// ── StatusMsg ────────────────────────────────────────────────────────────────
+/* ── StatusMsg ────────────────────────────────────────────────────────────── */
 
 function StatusMsg({ msg, successWord }: { msg: string; successWord: string }) {
   if (!msg) return null;
   const ok = msg.includes(successWord);
   return (
-    <p
-      className={`text-xs font-bold mb-3 px-3.5 py-2.5 rounded-xl ${
-        ok
-          ? 'text-green-400'
-          : 'text-red-400'
-      }`}
+    <p className={`text-[10px] font-bold mb-2 px-2.5 py-1.5 rounded-lg ${ok ? 'text-green-400' : 'text-red-400'}`}
       style={{
-        background: ok
-          ? 'linear-gradient(180deg, rgba(34,197,94,0.08) 0%, rgba(34,197,94,0.03) 100%)'
-          : 'linear-gradient(180deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.03) 100%)',
-        border: ok
-          ? '1px solid rgba(34,197,94,0.12)'
-          : '1px solid rgba(239,68,68,0.12)',
-      }}
-    >
+        background: ok ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.06)',
+        border: ok ? '1px solid rgba(34,197,94,0.1)' : '1px solid rgba(239,68,68,0.1)',
+      }}>
       {msg}
     </p>
   );
