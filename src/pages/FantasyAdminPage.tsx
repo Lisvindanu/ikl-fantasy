@@ -100,7 +100,11 @@ export function FantasyAdminPage() {
   const SECTION_RENDERERS: Record<AdminSection, () => React.ReactNode> = {
     overview: () => <OverviewSection {...sectionProps} />,
     matches: () => <MatchesSection {...sectionProps} />,
-    players: () => <PlayersPanel players={players} />,
+    players: () => <PlayersPanel players={players} onRefresh={async () => {
+      if (!season) return;
+      const p = await fantasyApi.getPlayers(season.id).catch(() => []);
+      setPlayers(Array.isArray(p) ? p : []);
+    }} />,
     season: () => <SeasonSection {...sectionProps} />,
     admins: () => <AdminManagementPanel />,
     tools: () => <ToolsSection {...sectionProps} />,

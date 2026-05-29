@@ -198,6 +198,23 @@ export async function adminUpdatePrices(seasonId: number): Promise<{ updated: nu
   return d;
 }
 
+// ── Admin: update player ────────────────────────────────────────────────────
+
+export async function adminUpdatePlayer(playerId: number, data: {
+  name?: string; role?: string; nationality?: string; price?: number;
+  mvps?: number; fantasyPts?: number;
+}): Promise<void> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/players/${playerId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    throw new Error((d as Record<string, string>).error || 'Failed to update player');
+  }
+}
+
 // ── Admin: seed IKL data ────────────────────────────────────────────────────
 
 export async function adminSeedIklFull(): Promise<{ seasonId: number; teams: number; players: number }> {
