@@ -178,7 +178,7 @@ export function MatchAdminCard({
       if (s.assists > 30) clientWarnings.push(`${players.find(p => p.id === s.playerId)?.name || `#${s.playerId}`}: ${s.assists} assists is very high`);
     }
     if (clientWarnings.length > 0) {
-      const proceed = confirm(`⚠️ Unusual stats detected:\n\n${clientWarnings.join('\n')}\n\nProceed anyway?`);
+      const proceed = confirm(`Warning: Unusual stats detected:\n\n${clientWarnings.join('\n')}\n\nProceed anyway?`);
       if (!proceed) return;
     }
 
@@ -186,7 +186,7 @@ export function MatchAdminCard({
     setSaveMsg('');
     try {
       const result = await fantasyApi.adminSaveGameStats(match.id, gameNumber, stats);
-      const warnMsg = result.warnings?.length ? ` (⚠️ ${result.warnings.length} warnings)` : '';
+      const warnMsg = result.warnings?.length ? ` (${result.warnings.length} warnings)` : '';
       setSaveMsg(`Game ${gameNumber} saved!${warnMsg}`);
       const s = await fantasyApi.getMatchStats(match.id);
       setExistingStats(s);

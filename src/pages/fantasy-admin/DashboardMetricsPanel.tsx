@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Shield, Gamepad2, ClipboardList, UserCheck, Activity } from 'lucide-react';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
 import * as fantasyApi from '../../api/fantasy';
 import type { AdminDashboardMetrics } from '../../api/fantasy';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export function DashboardMetricsPanel({ seasonId }: { seasonId: number }) {
   const [metrics, setMetrics] = useState<AdminDashboardMetrics | null>(null);
@@ -18,6 +22,40 @@ export function DashboardMetricsPanel({ seasonId }: { seasonId: number }) {
     { icon: <ClipboardList className="w-4 h-4" />, label: 'Stat Entries', value: metrics.totalStatRows, color: '#A855F7' },
   ];
 
+  const statusLabels = ['upcoming', 'live', 'completed', 'postponed'] as const;
+  const statusColors = { upcoming: '#6B7280', live: '#22C55E', completed: '#3B82F6', postponed: '#EF4444' };
+
+  const chartData = {
+    labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+    datasets: [{
+      data: statusLabels.map(s => metrics.matchesByStatus[s] || 0),
+      backgroundColor: statusLabels.map(s => `${statusColors[s]}30`),
+      borderColor: statusLabels.map(s => statusColors[s]),
+      borderWidth: 2,
+      hoverBackgroundColor: statusLabels.map(s => `${statusColors[s]}50`),
+    }],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '65%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1a1d24',
+        titleColor: '#fff',
+        bodyColor: '#9CA3AF',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        padding: 10,
+        titleFont: { weight: 'bold' as const, size: 12 },
+        bodyFont: { size: 11 },
+        cornerRadius: 8,
+      },
+    },
+  };
+
   return (
     <div className="space-y-4">
       {/* Stat cards */}
@@ -33,28 +71,33 @@ export function DashboardMetricsPanel({ seasonId }: { seasonId: number }) {
         ))}
       </div>
 
-      {/* Match status breakdown + recent activity */}
+      {/* Chart + recent activity */}
       <div className="grid sm:grid-cols-2 gap-3">
         <div className="rounded-xl p-4" style={{ background: '#0d1017', border: '1px solid rgba(255,255,255,0.08)' }}>
           <h4 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Matches by Status</h4>
-          <div className="space-y-2">
-            {(['upcoming', 'live', 'completed', 'postponed'] as const).map(s => {
-              const cnt = metrics.matchesByStatus[s] || 0;
-              const color = s === 'live' ? '#22C55E' : s === 'completed' ? '#3B82F6' : s === 'postponed' ? '#EF4444' : '#6B7280';
-              const pct = metrics.totalMatches > 0 ? (cnt / metrics.totalMatches) * 100 : 0;
-              return (
-                <div key={s}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="font-bold capitalize" style={{ color }}>{s}</span>
-                    <span className="text-gray-500 font-bold">{cnt}</span>
-                  </div>
-                  <div className="h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+
+          {metrics.totalMatches > 0 ? (
+            <div className="flex items-center gap-4">
+              <div className="w-28 h-28 flex-shrink-0">
+                <Doughnut data={chartData} options={chartOptions} />
+              </div>
+              <div className="space-y-2 flex-1">
+                {statusLabels.map(s => {
+                  const cnt = metrics.matchesByStatus[s] || 0;
+                  const color = statusColors[s];
+                  return (
+                    <div key={s} className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
+                      <span className="text-xs font-bold capitalize text-gray-400 flex-1">{s}</span>
+                      <span className="text-xs font-black text-white">{cnt}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-700 text-xs">No matches yet</p>
+          )}
         </div>
 
         <div className="rounded-xl p-4" style={{ background: '#0d1017', border: '1px solid rgba(255,255,255,0.08)' }}>

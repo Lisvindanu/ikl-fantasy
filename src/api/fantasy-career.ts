@@ -1,4 +1,4 @@
-import { API } from './fantasy';
+import { API, apiFetch } from './fantasy';
 
 // ── #48: Career Stats Across Seasons ─────────────────────────────────────────
 
@@ -38,7 +38,7 @@ export interface PlayerCareerStats {
 }
 
 export async function getPlayerCareerStats(playerId: number): Promise<PlayerCareerStats | null> {
-  const r = await fetch(`${API}/api/fantasy/players/${playerId}/career`);
+  const r = await apiFetch(`${API}/api/fantasy/players/${playerId}/career`);
   if (!r.ok) return null;
   const data = await r.json();
   return data;
@@ -54,7 +54,7 @@ export interface PlayerAward {
 }
 
 export async function getPlayerAwards(playerId: number): Promise<PlayerAward[]> {
-  const r = await fetch(`${API}/api/fantasy/players/${playerId}/awards`);
+  const r = await apiFetch(`${API}/api/fantasy/players/${playerId}/awards`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
@@ -69,7 +69,7 @@ export interface HeatmapCell {
 }
 
 export async function getPlayerHeatmap(playerId: number): Promise<HeatmapCell[]> {
-  const r = await fetch(`${API}/api/fantasy/players/${playerId}/heatmap`);
+  const r = await apiFetch(`${API}/api/fantasy/players/${playerId}/heatmap`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return Array.isArray(data) ? data : [];
@@ -102,7 +102,7 @@ export interface PlayerMatchupsResponse {
 }
 
 export async function getPlayerMatchups(playerId: number): Promise<PlayerMatchupsResponse | null> {
-  const r = await fetch(`${API}/api/fantasy/players/${playerId}/matchups`);
+  const r = await apiFetch(`${API}/api/fantasy/players/${playerId}/matchups`);
   if (!r.ok) return null;
   const data = await r.json();
   return data;
@@ -128,7 +128,7 @@ export interface GameHero {
 }
 
 export async function getMatchHeroes(matchId: number): Promise<Record<number, GameHero[]>> {
-  const r = await fetch(`${API}/api/fantasy/matches/${matchId}/heroes`);
+  const r = await apiFetch(`${API}/api/fantasy/matches/${matchId}/heroes`);
   if (!r.ok) return {};
   const data = await r.json();
   return data;
@@ -148,7 +148,7 @@ export interface HeroMeta {
 }
 
 export async function getSeasonHeroMeta(seasonId: number): Promise<HeroMeta[]> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/hero-meta`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/hero-meta`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
@@ -167,7 +167,7 @@ export interface PlayerHeroPoolEntry {
 }
 
 export async function getPlayerHeroPool(playerId: number): Promise<PlayerHeroPoolEntry[]> {
-  const r = await fetch(`${API}/api/fantasy/players/${playerId}/hero-pool`);
+  const r = await apiFetch(`${API}/api/fantasy/players/${playerId}/hero-pool`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];

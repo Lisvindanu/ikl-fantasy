@@ -1,4 +1,4 @@
-import { API } from './fantasy';
+import { API, apiFetch } from './fantasy';
 
 // #7: Player ownership
 export interface PlayerOwnershipData {
@@ -7,7 +7,7 @@ export interface PlayerOwnershipData {
 }
 
 export async function getPlayerOwnership(seasonId: number): Promise<PlayerOwnershipData> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/ownership`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/ownership`);
   if (!r.ok) return { total: 0, ownership: {} };
   return r.json();
 }
@@ -20,7 +20,7 @@ export interface PlayerFormEntry {
 }
 
 export async function getPlayerForm(seasonId: number): Promise<PlayerFormEntry[]> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/form`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/form`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
@@ -43,7 +43,7 @@ export interface PlayerOfTheWeek {
 }
 
 export async function getPlayerOfTheWeek(seasonId: number): Promise<PlayerOfTheWeek | null> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/potw`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/potw`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
@@ -79,7 +79,7 @@ export interface SeasonRecords {
 }
 
 export async function getSeasonRecords(seasonId: number): Promise<SeasonRecords> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/records`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/records`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
@@ -93,7 +93,7 @@ export interface MatchPreview {
 }
 
 export async function getMatchPreview(matchId: number): Promise<MatchPreview | null> {
-  const r = await fetch(`${API}/api/fantasy/matches/${matchId}/preview`);
+  const r = await apiFetch(`${API}/api/fantasy/matches/${matchId}/preview`);
   if (!r.ok) return null;
   return r.json();
 }

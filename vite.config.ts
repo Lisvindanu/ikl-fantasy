@@ -20,6 +20,7 @@ export default defineConfig({
         target: 'https://hokapi.project-n.site',
         changeOrigin: true,
         secure: false,
+        cookieDomainRewrite: { '.project-n.site': 'localhost' },
       },
     },
   },

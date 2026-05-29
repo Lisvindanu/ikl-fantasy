@@ -44,6 +44,7 @@ export function Layout() {
     try {
       const res = await fetch(`${API_BASE}/api/auth/google`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credential: credentialResponse.credential }),
       });

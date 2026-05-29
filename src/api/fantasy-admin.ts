@@ -1,5 +1,5 @@
 import type { IKLMatch, AuditLogEntry } from './fantasy';
-import { API, authHeader } from './fantasy';
+import { API, apiFetch } from './fantasy';
 
 // ── Admin: match management ──────────────────────────────────────────────────
 
@@ -9,9 +9,9 @@ export async function adminCreateMatch(data: {
   team1Score: number; team2Score: number; winnerTeamId: number | null;
   status?: string;
 }): Promise<IKLMatch> {
-  const r = await fetch(`${API}/api/fantasy/admin/matches`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/matches`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
   const res = await r.json();
@@ -22,9 +22,9 @@ export async function adminCreateMatch(data: {
 export async function adminSaveGameStats(matchId: number, gameNumber: number, stats: {
   playerId: number; kills: number; deaths: number; assists: number; isMvp: boolean; hasPentaKill: boolean;
 }[]): Promise<{ ok: boolean; warnings?: string[] }> {
-  const r = await fetch(`${API}/api/fantasy/admin/matches/${matchId}/stats`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/matches/${matchId}/stats`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ gameNumber, stats }),
   });
   const d = await r.json();
@@ -33,17 +33,15 @@ export async function adminSaveGameStats(matchId: number, gameNumber: number, st
 }
 
 export async function adminDeleteMatch(matchId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/admin/matches/${matchId}`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/matches/${matchId}`, {
     method: 'DELETE',
-    headers: authHeader(),
   });
   if (!r.ok) throw new Error('Failed to delete match');
 }
 
 export async function adminCloneMatch(matchId: number): Promise<IKLMatch> {
-  const r = await fetch(`${API}/api/fantasy/admin/matches/${matchId}/clone`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/matches/${matchId}/clone`, {
     method: 'POST',
-    headers: authHeader(),
   });
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || 'Failed to clone match');
@@ -51,9 +49,8 @@ export async function adminCloneMatch(matchId: number): Promise<IKLMatch> {
 }
 
 export async function adminRecalculate(seasonId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/admin/recalculate/${seasonId}`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/recalculate/${seasonId}`, {
     method: 'POST',
-    headers: authHeader(),
   });
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));
@@ -62,9 +59,9 @@ export async function adminRecalculate(seasonId: number): Promise<void> {
 }
 
 export async function adminUpdateMatchStatus(matchId: number, status: string): Promise<IKLMatch> {
-  const r = await fetch(`${API}/api/fantasy/admin/matches/${matchId}/status`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/matches/${matchId}/status`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
   });
   const d = await r.json();
@@ -73,8 +70,7 @@ export async function adminUpdateMatchStatus(matchId: number, status: string): P
 }
 
 export async function adminGetAuditLog(limit = 50, offset = 0): Promise<AuditLogEntry[]> {
-  const r = await fetch(`${API}/api/fantasy/admin/audit?limit=${limit}&offset=${offset}`, {
-    headers: authHeader(),
+  const r = await apiFetch(`${API}/api/fantasy/admin/audit?limit=${limit}&offset=${offset}`, {
   });
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
@@ -91,23 +87,22 @@ export interface AdminUser {
 }
 
 export async function adminGetAdmins(): Promise<AdminUser[]> {
-  const r = await fetch(`${API}/api/fantasy/admin/admins`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/admin/admins`, {});
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
 
 export async function adminFindUser(email: string): Promise<AdminUser | null> {
-  const r = await fetch(`${API}/api/fantasy/admin/find-user?email=${encodeURIComponent(email)}`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/admin/find-user?email=${encodeURIComponent(email)}`, {});
   if (!r.ok) return null;
   const data = await r.json();
   return data || null;
 }
 
 export async function adminSetAdmin(userId: number, grant: boolean): Promise<AdminUser> {
-  const r = await fetch(`${API}/api/fantasy/admin/admins/${userId}`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/admins/${userId}`, {
     method: grant ? 'POST' : 'DELETE',
-    headers: authHeader(),
   });
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Failed');
@@ -120,9 +115,9 @@ export async function adminUpdateSeasonSettings(seasonId: number, settings: {
   picksLockAt?: string | null;
   maxParticipants?: number | null;
 }): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/admin/seasons/${seasonId}/settings`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/seasons/${seasonId}/settings`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(settings),
   });
   if (!r.ok) {
@@ -147,16 +142,15 @@ export interface AdminDashboardMetrics {
 }
 
 export async function adminGetDashboardMetrics(seasonId: number): Promise<AdminDashboardMetrics> {
-  const r = await fetch(`${API}/api/fantasy/admin/dashboard/${seasonId}`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/admin/dashboard/${seasonId}`, {});
   return r.json();
 }
 
 // ── Admin: predictions grading ────────────────────────────────────────────────
 
 export async function adminGradePredictions(matchId: number): Promise<{ graded: number }> {
-  const r = await fetch(`${API}/api/fantasy/admin/matches/${matchId}/grade-predictions`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/matches/${matchId}/grade-predictions`, {
     method: 'POST',
-    headers: authHeader(),
   });
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || 'Failed to grade predictions');
@@ -173,9 +167,9 @@ export async function adminUpdateMatchObjectives(matchId: number, objectives: {
   tempestDragonTeamId?: number | null;
   overUnderLine?: number | null;
 }): Promise<IKLMatch> {
-  const r = await fetch(`${API}/api/fantasy/admin/matches/${matchId}/objectives`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/matches/${matchId}/objectives`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(objectives),
   });
   const d = await r.json();
@@ -185,9 +179,8 @@ export async function adminUpdateMatchObjectives(matchId: number, objectives: {
 
 // #63: Weekly Recap Email
 export async function sendWeeklyRecap(seasonId: number): Promise<{ sent: number }> {
-  const r = await fetch(`${API}/api/fantasy/admin/seasons/${seasonId}/send-recap`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/seasons/${seasonId}/send-recap`, {
     method: 'POST',
-    headers: authHeader(),
   });
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || 'Failed to send recap');
@@ -197,9 +190,8 @@ export async function sendWeeklyRecap(seasonId: number): Promise<{ sent: number 
 // ── Admin: dynamic prices ───────────────────────────────────────────────────
 
 export async function adminUpdatePrices(seasonId: number): Promise<{ updated: number }> {
-  const r = await fetch(`${API}/api/fantasy/admin/seasons/${seasonId}/update-prices`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/seasons/${seasonId}/update-prices`, {
     method: 'POST',
-    headers: authHeader(),
   });
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || 'Failed to update prices');
@@ -209,9 +201,8 @@ export async function adminUpdatePrices(seasonId: number): Promise<{ updated: nu
 // ── Admin: seed IKL data ────────────────────────────────────────────────────
 
 export async function adminSeedIklFull(): Promise<{ seasonId: number; teams: number; players: number }> {
-  const r = await fetch(`${API}/api/fantasy/admin/seed-ikl-full`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/seed-ikl-full`, {
     method: 'POST',
-    headers: authHeader(),
   });
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || 'Failed to seed IKL data');
@@ -221,9 +212,9 @@ export async function adminSeedIklFull(): Promise<{ seasonId: number; teams: num
 // ── Admin: CSV import stats ─────────────────────────────────────────────────
 
 export async function adminCsvImportStats(matchId: number, gameNumber: number, csv: string): Promise<{ ok: boolean; imported: number; errors: string[] }> {
-  const r = await fetch(`${API}/api/fantasy/admin/matches/${matchId}/csv-import`, {
+  const r = await apiFetch(`${API}/api/fantasy/admin/matches/${matchId}/csv-import`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ matchId, gameNumber, csv }),
   });
   const d = await r.json();

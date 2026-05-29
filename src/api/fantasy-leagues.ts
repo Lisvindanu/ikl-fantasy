@@ -1,4 +1,4 @@
-import { API, authHeader } from './fantasy';
+import { API, apiFetch } from './fantasy';
 
 // ── Private leagues ───────────────────────────────────────────────────────────
 
@@ -43,16 +43,16 @@ export interface LeagueActivity {
 }
 
 export async function getLeagueActivity(leagueId: number): Promise<LeagueActivity[]> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}/activity`);
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}/activity`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
 }
 
 export async function createLeague(seasonId: number, name: string, maxMembers?: number): Promise<FantasyLeague> {
-  const r = await fetch(`${API}/api/fantasy/leagues`, {
+  const r = await apiFetch(`${API}/api/fantasy/leagues`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ seasonId, name, maxMembers }),
   });
   const data = await r.json();
@@ -61,9 +61,9 @@ export async function createLeague(seasonId: number, name: string, maxMembers?: 
 }
 
 export async function joinLeague(inviteCode: string): Promise<FantasyLeague> {
-  const r = await fetch(`${API}/api/fantasy/leagues/join`, {
+  const r = await apiFetch(`${API}/api/fantasy/leagues/join`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ inviteCode }),
   });
   const data = await r.json();
@@ -72,22 +72,22 @@ export async function joinLeague(inviteCode: string): Promise<FantasyLeague> {
 }
 
 export async function getMyLeagues(seasonId: number): Promise<FantasyLeague[]> {
-  const r = await fetch(`${API}/api/fantasy/leagues/mine/${seasonId}`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/leagues/mine/${seasonId}`, {});
   const data = await r.json();
   return Array.isArray(data) ? data : [];
 }
 
 export async function getLeague(leagueId: number): Promise<FantasyLeague & { leaderboard: LeagueMemberEntry[] }> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}`);
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
 
 export async function transferLeagueOwnership(leagueId: number, newOwnerId: number): Promise<FantasyLeague> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}/transfer-ownership`, {
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}/transfer-ownership`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ newOwnerId }),
   });
   const d = await r.json();
@@ -96,9 +96,8 @@ export async function transferLeagueOwnership(leagueId: number, newOwnerId: numb
 }
 
 export async function deleteLeague(leagueId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}`, {
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}`, {
     method: 'DELETE',
-    headers: authHeader(),
   });
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));
@@ -107,9 +106,9 @@ export async function deleteLeague(leagueId: number): Promise<void> {
 }
 
 export async function leaveLeague(leagueId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}/leave`, {
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}/leave`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
   });
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));
@@ -118,9 +117,9 @@ export async function leaveLeague(leagueId: number): Promise<void> {
 }
 
 export async function updateLeague(leagueId: number, data: { name?: string; maxMembers?: number }): Promise<FantasyLeague> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}`, {
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
   const d = await r.json();
@@ -131,16 +130,16 @@ export async function updateLeague(leagueId: number, data: { name?: string; maxM
 // ── #59: Public leagues ───────────────────────────────────────────────────────
 
 export async function getPublicLeagues(seasonId: number): Promise<FantasyLeague[]> {
-  const r = await fetch(`${API}/api/fantasy/leagues/public/${seasonId}`);
+  const r = await apiFetch(`${API}/api/fantasy/leagues/public/${seasonId}`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
 }
 
 export async function joinPublicLeague(leagueId: number): Promise<FantasyLeague> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}/join-public`, {
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}/join-public`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
   });
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Failed to join league');
@@ -150,7 +149,7 @@ export async function joinPublicLeague(leagueId: number): Promise<FantasyLeague>
 // ── #60: Team-fan leagues ─────────────────────────────────────────────────────
 
 export async function getTeamFanLeagues(seasonId: number): Promise<FantasyLeague[]> {
-  const r = await fetch(`${API}/api/fantasy/leagues/team-fan/${seasonId}`);
+  const r = await apiFetch(`${API}/api/fantasy/leagues/team-fan/${seasonId}`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
@@ -168,8 +167,7 @@ export interface LeagueMessage {
 }
 
 export async function getLeagueMessages(leagueId: number): Promise<LeagueMessage[]> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}/messages`, {
-    headers: authHeader(),
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}/messages`, {
   });
   if (!r.ok) return [];
   const data = await r.json();
@@ -177,9 +175,9 @@ export async function getLeagueMessages(leagueId: number): Promise<LeagueMessage
 }
 
 export async function sendLeagueMessage(leagueId: number, content: string): Promise<LeagueMessage> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}/messages`, {
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}/messages`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content }),
   });
   const data = await r.json();
@@ -188,9 +186,8 @@ export async function sendLeagueMessage(leagueId: number, content: string): Prom
 }
 
 export async function deleteLeagueMessage(messageId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/league-messages/${messageId}`, {
+  const r = await apiFetch(`${API}/api/fantasy/league-messages/${messageId}`, {
     method: 'DELETE',
-    headers: authHeader(),
   });
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));
@@ -237,22 +234,22 @@ export interface KnockoutSummary {
 }
 
 export async function getLeagueKnockouts(leagueId: number): Promise<KnockoutSummary[]> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}/knockouts`);
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}/knockouts`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
 }
 
 export async function getKnockoutBracket(knockoutId: number): Promise<Knockout | null> {
-  const r = await fetch(`${API}/api/fantasy/knockouts/${knockoutId}`);
+  const r = await apiFetch(`${API}/api/fantasy/knockouts/${knockoutId}`);
   if (!r.ok) return null;
   return r.json();
 }
 
 export async function createKnockout(leagueId: number): Promise<KnockoutSummary> {
-  const r = await fetch(`${API}/api/fantasy/leagues/${leagueId}/knockout`, {
+  const r = await apiFetch(`${API}/api/fantasy/leagues/${leagueId}/knockout`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
   });
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Failed to create knockout');
@@ -260,9 +257,9 @@ export async function createKnockout(leagueId: number): Promise<KnockoutSummary>
 }
 
 export async function advanceKnockoutRound(knockoutId: number): Promise<{ status: string; round?: number; winner?: { user_id: number; user_name: string } | null }> {
-  const r = await fetch(`${API}/api/fantasy/knockouts/${knockoutId}/advance`, {
+  const r = await apiFetch(`${API}/api/fantasy/knockouts/${knockoutId}/advance`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
   });
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Failed to advance round');
@@ -292,8 +289,7 @@ export interface UserSearchResult {
 }
 
 export async function searchUsers(query: string): Promise<UserSearchResult[]> {
-  const r = await fetch(`${API}/api/fantasy/users/search?q=${encodeURIComponent(query)}`, {
-    headers: authHeader(),
+  const r = await apiFetch(`${API}/api/fantasy/users/search?q=${encodeURIComponent(query)}`, {
   });
   if (!r.ok) return [];
   const data = await r.json();
@@ -301,23 +297,23 @@ export async function searchUsers(query: string): Promise<UserSearchResult[]> {
 }
 
 export async function getFriends(): Promise<Friend[]> {
-  const r = await fetch(`${API}/api/fantasy/friends`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/friends`, {});
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
 }
 
 export async function getPendingRequests(): Promise<PendingRequest[]> {
-  const r = await fetch(`${API}/api/fantasy/friends/pending`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/friends/pending`, {});
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
 }
 
 export async function sendFriendRequest(friendId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/friends/request`, {
+  const r = await apiFetch(`${API}/api/fantasy/friends/request`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ friendId }),
   });
   const data = await r.json();
@@ -325,27 +321,26 @@ export async function sendFriendRequest(friendId: number): Promise<void> {
 }
 
 export async function acceptFriendRequest(requestId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/friends/${requestId}/accept`, {
+  const r = await apiFetch(`${API}/api/fantasy/friends/${requestId}/accept`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
   });
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Failed to accept request');
 }
 
 export async function declineFriendRequest(requestId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/friends/${requestId}/decline`, {
+  const r = await apiFetch(`${API}/api/fantasy/friends/${requestId}/decline`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
   });
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Failed to decline request');
 }
 
 export async function removeFriend(friendshipId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/friends/${friendshipId}`, {
+  const r = await apiFetch(`${API}/api/fantasy/friends/${friendshipId}`, {
     method: 'DELETE',
-    headers: authHeader(),
   });
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));

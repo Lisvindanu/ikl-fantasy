@@ -1,4 +1,4 @@
-import { API, authHeader } from './fantasy';
+import { API, apiFetch } from './fantasy';
 
 // #57: Player match history
 export interface PlayerMatchHistoryEntry {
@@ -24,7 +24,7 @@ export interface PlayerMatchHistoryEntry {
 }
 
 export async function getPlayerMatchHistory(playerId: number): Promise<PlayerMatchHistoryEntry[]> {
-  const r = await fetch(`${API}/api/fantasy/players/${playerId}/history`);
+  const r = await apiFetch(`${API}/api/fantasy/players/${playerId}/history`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
@@ -67,7 +67,7 @@ export interface PlayerProfile {
 }
 
 export async function getPlayerProfile(playerId: number): Promise<PlayerProfile> {
-  const r = await fetch(`${API}/api/fantasy/players/${playerId}/profile`);
+  const r = await apiFetch(`${API}/api/fantasy/players/${playerId}/profile`);
   if (!r.ok) throw new Error('Player not found');
   return r.json();
 }
@@ -126,9 +126,9 @@ export async function savePrediction(data: {
   gameNumber?: number;
   isConfident?: boolean;
 }): Promise<Prediction> {
-  const r = await fetch(`${API}/api/fantasy/predictions`, {
+  const r = await apiFetch(`${API}/api/fantasy/predictions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
   const d = await r.json();
@@ -137,14 +137,14 @@ export async function savePrediction(data: {
 }
 
 export async function getMyPredictions(seasonId: number): Promise<Prediction[]> {
-  const r = await fetch(`${API}/api/fantasy/predictions/${seasonId}`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/predictions/${seasonId}`, {});
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
 
 export async function getPredictionLeaderboard(seasonId: number): Promise<PredictionLeaderboardEntry[]> {
-  const r = await fetch(`${API}/api/fantasy/predictions/${seasonId}/leaderboard`);
+  const r = await apiFetch(`${API}/api/fantasy/predictions/${seasonId}/leaderboard`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;

@@ -2,9 +2,23 @@
 
 export const API = import.meta.env.DEV ? '' : 'https://hokapi.project-n.site';
 
+/**
+ * @deprecated — kept for backwards compat during migration.
+ * New code should use apiFetch() which sends httpOnly cookies automatically.
+ */
 export function authHeader(): Record<string, string> {
-  const token = localStorage.getItem('token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return {};
+}
+
+/**
+ * Fetch wrapper that always sends httpOnly auth cookies.
+ * Use this instead of raw `fetch()` for authenticated API calls.
+ */
+export function apiFetch(url: string, init?: RequestInit): Promise<Response> {
+  return fetch(url, {
+    ...init,
+    credentials: 'include',
+  });
 }
 
 // ── Shared types ──────────────────────────────────────────────────────────────
@@ -224,7 +238,7 @@ export interface TeamStanding {
 }
 
 export async function getSeasonStandings(seasonId: number): Promise<TeamStanding[]> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/standings`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/standings`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
@@ -233,14 +247,14 @@ export async function getSeasonStandings(seasonId: number): Promise<TeamStanding
 // ── Core API functions ────────────────────────────────────────────────────────
 
 export async function getSeasons(): Promise<IKLSeason[]> {
-  const r = await fetch(`${API}/api/fantasy/seasons`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
 
 export async function getSeasonDetail(id: number): Promise<IKLSeason & { teams: IKLTeam[] }> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${id}`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${id}`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
@@ -250,7 +264,7 @@ export async function getPlayers(seasonId: number, opts?: { role?: string; teamI
   const params = new URLSearchParams();
   if (opts?.role) params.set('role', opts.role);
   if (opts?.teamId) params.set('teamId', String(opts.teamId));
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/players?${params}`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/players?${params}`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
@@ -260,28 +274,28 @@ export async function getLeaderboard(seasonId: number, opts?: { limit?: number; 
   const params = new URLSearchParams();
   if (opts?.limit) params.set('limit', String(opts.limit));
   if (opts?.offset) params.set('offset', String(opts.offset));
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/leaderboard?${params}`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/leaderboard?${params}`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
 
 export async function getMyTeam(seasonId: number): Promise<FantasyTeam> {
-  const r = await fetch(`${API}/api/fantasy/my-team/${seasonId}`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/my-team/${seasonId}`, {});
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
 
 export async function getMatches(seasonId: number): Promise<IKLMatch[]> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/matches`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/matches`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
 
 export async function getMatchStats(matchId: number): Promise<MatchPlayerStat[]> {
-  const r = await fetch(`${API}/api/fantasy/matches/${matchId}/stats`);
+  const r = await apiFetch(`${API}/api/fantasy/matches/${matchId}/stats`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
@@ -292,9 +306,9 @@ export async function saveMyTeam(
   picks: { playerId: number; role: string }[],
   opts?: { captainId?: number; viceCaptainId?: number; benchPicks?: { playerId: number; role: string }[] }
 ): Promise<{ id: number; totalPts: number }> {
-  const r = await fetch(`${API}/api/fantasy/team`, {
+  const r = await apiFetch(`${API}/api/fantasy/team`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       seasonId, name, picks,
       captainId: opts?.captainId,
@@ -309,9 +323,9 @@ export async function saveMyTeam(
 
 // #83: Custom Team Kit
 export async function updateTeamKit(seasonId: number, kitColor: string, kitEmoji: string): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/my-team/${seasonId}/kit`, {
+  const r = await apiFetch(`${API}/api/fantasy/my-team/${seasonId}/kit`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ kitColor, kitEmoji }),
   });
   if (!r.ok) {
@@ -321,7 +335,7 @@ export async function updateTeamKit(seasonId: number, kitColor: string, kitEmoji
 }
 
 export async function getSeasonMeta(seasonId: number): Promise<SeasonMeta> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/meta`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/meta`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
@@ -330,16 +344,16 @@ export async function getSeasonMeta(seasonId: number): Promise<SeasonMeta> {
 // ── Team mode API ─────────────────────────────────────────────────────────────
 
 export async function getMyTeamSelection(seasonId: number): Promise<FantasyTeamSelection | null> {
-  const r = await fetch(`${API}/api/fantasy/my-team-selection/${seasonId}`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/my-team-selection/${seasonId}`, {});
   if (!r.ok) return null;
   const data = await r.json();
   return data || null;
 }
 
 export async function saveMyTeamSelection(seasonId: number, teamId: number): Promise<FantasyTeamSelection> {
-  const r = await fetch(`${API}/api/fantasy/team-selection`, {
+  const r = await apiFetch(`${API}/api/fantasy/team-selection`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ seasonId, teamId }),
   });
   const data = await r.json();
@@ -348,7 +362,7 @@ export async function saveMyTeamSelection(seasonId: number, teamId: number): Pro
 }
 
 export async function getTeamLeaderboard(seasonId: number): Promise<TeamLeaderboardEntry[]> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/team-leaderboard`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/team-leaderboard`);
   const data = await r.json();
   if (!r.ok) throw new Error(data.error || 'Request failed');
   return data;
@@ -375,7 +389,7 @@ export interface LoyaltyInfo {
 }
 
 export async function getLoyaltyInfo(seasonId: number): Promise<LoyaltyInfo | null> {
-  const r = await fetch(`${API}/api/fantasy/loyalty/${seasonId}`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/loyalty/${seasonId}`, {});
   if (!r.ok) return null;
   return r.json();
 }
@@ -392,7 +406,7 @@ export interface Achievement {
 }
 
 export async function getAchievements(): Promise<Achievement[]> {
-  const r = await fetch(`${API}/api/fantasy/achievements`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/achievements`, {});
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
@@ -409,16 +423,15 @@ export interface LoginStreakInfo {
 }
 
 export async function recordLoginStreak(): Promise<LoginStreakInfo | null> {
-  const r = await fetch(`${API}/api/fantasy/login-streak`, {
+  const r = await apiFetch(`${API}/api/fantasy/login-streak`, {
     method: 'POST',
-    headers: authHeader(),
   });
   if (!r.ok) return null;
   return r.json();
 }
 
 export async function getLoginStreak(): Promise<{ streak: number; longestStreak: number; totalBonus: number } | null> {
-  const r = await fetch(`${API}/api/fantasy/login-streak`, { headers: authHeader() });
+  const r = await apiFetch(`${API}/api/fantasy/login-streak`, {});
   if (!r.ok) return null;
   return r.json();
 }
@@ -436,7 +449,7 @@ export interface LeagueTrophy {
 }
 
 export async function getUserTrophies(userId: number): Promise<LeagueTrophy[]> {
-  const r = await fetch(`${API}/api/fantasy/trophies/${userId}`);
+  const r = await apiFetch(`${API}/api/fantasy/trophies/${userId}`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
@@ -454,16 +467,16 @@ export interface MatchComment {
 }
 
 export async function getMatchComments(matchId: number): Promise<MatchComment[]> {
-  const r = await fetch(`${API}/api/fantasy/matches/${matchId}/comments`);
+  const r = await apiFetch(`${API}/api/fantasy/matches/${matchId}/comments`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];
 }
 
 export async function addMatchComment(matchId: number, content: string): Promise<MatchComment> {
-  const r = await fetch(`${API}/api/fantasy/matches/${matchId}/comments`, {
+  const r = await apiFetch(`${API}/api/fantasy/matches/${matchId}/comments`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content }),
   });
   const data = await r.json();
@@ -472,9 +485,8 @@ export async function addMatchComment(matchId: number, content: string): Promise
 }
 
 export async function deleteMatchComment(commentId: number): Promise<void> {
-  const r = await fetch(`${API}/api/fantasy/comments/${commentId}`, {
+  const r = await apiFetch(`${API}/api/fantasy/comments/${commentId}`, {
     method: 'DELETE',
-    headers: authHeader(),
   });
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));
@@ -501,7 +513,7 @@ export interface PlayerNews {
 }
 
 export async function getSeasonNews(seasonId: number): Promise<PlayerNews[]> {
-  const r = await fetch(`${API}/api/fantasy/seasons/${seasonId}/news`);
+  const r = await apiFetch(`${API}/api/fantasy/seasons/${seasonId}/news`);
   if (!r.ok) return [];
   const data = await r.json();
   return Array.isArray(data) ? data : [];

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Users } from 'lucide-react';
 import type { LeaderboardEntry } from '../../api/fantasy';
+import { KitIcon } from '../../components/fantasy/KitIcons';
 
 function CountUp({ target }: { target: number }) {
   const [val, setVal] = useState(0);
@@ -129,7 +130,7 @@ export function LeaderboardTab({ leaderboard, isAuthenticated, onGoToDraft }: Pr
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-white truncate">
-                      {kitEmoji && <span className="mr-1.5">{kitEmoji}</span>}
+                      {kitEmoji && <KitIcon name={kitEmoji} className="w-4 h-4 inline-block mr-1.5 align-text-bottom" />}
                       {entry.user_name}
                     </div>
                     <div className="text-gray-600 text-xs truncate">{entry.team_name}</div>

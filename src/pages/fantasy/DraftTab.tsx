@@ -226,14 +226,7 @@ const KIT_COLORS = [
   '#A855F7', '#8B5CF6',
 ];
 
-const KIT_EMOJIS = [
-  '\u2694\uFE0F', '\uD83C\uDFC6', '\uD83D\uDD25', '\uD83D\uDC8E', '\uD83D\uDC51',
-  '\uD83E\uDD81', '\uD83D\uDC09', '\uD83C\uDFAE', '\uD83C\uDFAF', '\u2B50',
-  '\uD83C\uDF1F', '\uD83D\uDC80', '\uD83D\uDEE1\uFE0F', '\uD83D\uDDE1\uFE0F', '\u26A1',
-  '\uD83C\uDFC5', '\uD83C\uDF96\uFE0F', '\uD83E\uDD85', '\uD83D\uDC3A', '\uD83E\uDD8A',
-  '\uD83D\uDC0D', '\uD83E\uDD88', '\uD83C\uDFAA', '\uD83C\uDF0A', '\uD83D\uDC9C',
-  '\uD83D\uDC99', '\uD83D\uDC9A', '\u2764\uFE0F', '\uD83E\uDDE1', '\uD83D\uDC9B',
-];
+import { KIT_ICONS, KitIcon } from '../../components/fantasy/KitIcons';
 
 function KitCustomizer({ seasonId, isAuthenticated }: { seasonId: number | null; isAuthenticated: boolean }) {
   const [open, setOpen] = useState(false);
@@ -282,7 +275,7 @@ function KitCustomizer({ seasonId, isAuthenticated }: { seasonId: number | null;
         }}>
         <Palette className="w-3.5 h-3.5" />
         Customize Kit
-        <span className="ml-auto text-lg leading-none">{kitEmoji || ''}</span>
+        {kitEmoji && <KitIcon name={kitEmoji} className="ml-auto w-4 h-4" />}
         {kitColor !== '#6366f1' && (
           <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: kitColor }} />
         )}
@@ -292,7 +285,7 @@ function KitCustomizer({ seasonId, isAuthenticated }: { seasonId: number | null;
         <div className="mt-2 rounded-xl p-4 space-y-4" style={{ background: '#0d1017', border: '1px solid rgba(255,255,255,0.08)' }}>
           {/* Preview */}
           <div className="flex items-center justify-center gap-3 py-3 rounded-lg" style={{ background: `${kitColor}15`, border: `1px solid ${kitColor}30` }}>
-            <span className="text-3xl">{kitEmoji || '\uD83C\uDFC6'}</span>
+            <KitIcon name={kitEmoji || 'trophy'} className="w-8 h-8" />
             <div>
               <div className="font-black text-white text-sm">Your Team Kit</div>
               <div className="text-xs" style={{ color: kitColor }}>Kit preview</div>
@@ -336,7 +329,7 @@ function KitCustomizer({ seasonId, isAuthenticated }: { seasonId: number | null;
             </div>
           </div>
 
-          {/* Emoji selector */}
+          {/* Icon selector */}
           <div>
             <div className="text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">Team Icon</div>
             <div className="flex flex-wrap gap-1.5">
@@ -350,16 +343,17 @@ function KitCustomizer({ seasonId, isAuthenticated }: { seasonId: number | null;
                 }}>
                 --
               </button>
-              {KIT_EMOJIS.map(e => (
+              {KIT_ICONS.map(k => (
                 <button
-                  key={e}
-                  onClick={() => setKitEmoji(e)}
-                  className="w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-transform hover:scale-110"
+                  key={k.name}
+                  onClick={() => setKitEmoji(k.name)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform hover:scale-110"
                   style={{
-                    background: kitEmoji === e ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-                    border: kitEmoji === e ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                    background: kitEmoji === k.name ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+                    border: kitEmoji === k.name ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                    color: kitEmoji === k.name ? '#F59E0B' : '#6B7280',
                   }}>
-                  {e}
+                  <k.icon className="w-4 h-4" />
                 </button>
               ))}
             </div>
