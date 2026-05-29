@@ -28,7 +28,7 @@ function ScoreBox({ score, isWinner, color }: { score: number; isWinner: boolean
   );
 }
 
-function GameStatsRow({ stats, gameNumber, isUltimateBattle }: { stats: MatchPlayerStat[]; gameNumber: number; isUltimateBattle?: boolean }) {
+export function GameStatsRow({ stats, gameNumber, isUltimateBattle }: { stats: MatchPlayerStat[]; gameNumber: number; isUltimateBattle?: boolean }) {
   const game = stats.filter(s => s.game_number === gameNumber);
   if (!game.length) return null;
 
@@ -101,7 +101,7 @@ function GameStatsRow({ stats, gameNumber, isUltimateBattle }: { stats: MatchPla
   );
 }
 
-function FormDots({ form, color }: { form: ('W' | 'L' | 'D')[]; color: string }) {
+export function FormDots({ form, color }: { form: ('W' | 'L' | 'D')[]; color: string }) {
   return (
     <div className="flex gap-1">
       {form.map((r, i) => (
