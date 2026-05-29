@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, CalendarDays, CircleDot, CheckCircle2, Clock, AlertTriangle, Inbox, ListFilter } from 'lucide-react';
+import { Search, CalendarDays, CircleDot, CheckCircle2, Clock, AlertTriangle, Inbox, ListFilter, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { AdminSectionProps, MatchFilter } from './adminConstants';
 import { filterMatches, getStatusCounts } from './adminConstants';
 import { CreateMatchForm } from './CreateMatchForm';
@@ -128,10 +128,13 @@ export function MatchesSection({
   const [matchFilter, setMatchFilter] = useState<MatchFilter>('all');
   const [matchWeek, setMatchWeek] = useState(0);
   const [matchSearch, setMatchSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 10;
 
   const statusCounts = useMemo(() => getStatusCounts(matches), [matches]);
 
   const filteredMatches = useMemo(() => {
+    setPage(0);
     const base = filterMatches(matches, matchFilter, matchWeek);
     if (!matchSearch.trim()) return base;
     const q = matchSearch.toLowerCase();
@@ -143,6 +146,12 @@ export function MatchesSection({
         m.team2_name.toLowerCase().includes(q),
     );
   }, [matches, matchFilter, matchWeek, matchSearch]);
+
+  const totalPages = Math.ceil(filteredMatches.length / PAGE_SIZE);
+  const paginatedMatches = useMemo(() => {
+    const sorted = [...filteredMatches].sort((a, b) => b.id - a.id);
+    return sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  }, [filteredMatches, page]);
 
   const weeks = useMemo(() => {
     const set = new Set(matches.map(m => m.week));
@@ -210,27 +219,44 @@ export function MatchesSection({
         </div>
       </AdminPanel>
 
-      {/* Results header */}
-      <SectionHeader count={filteredMatches.length} />
+      {/* Results header + pagination */}
+      <div className="flex items-center justify-between px-1">
+        <SectionHeader count={filteredMatches.length} />
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
+            <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
+              className="p-1.5 rounded-lg disabled:opacity-20 hover:bg-white/5 transition-colors"
+              style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+              <ChevronLeft className="w-3.5 h-3.5 text-gray-500" />
+            </button>
+            <span className="text-[10px] text-gray-600 font-bold px-2">
+              {page + 1} / {totalPages}
+            </span>
+            <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
+              className="p-1.5 rounded-lg disabled:opacity-20 hover:bg-white/5 transition-colors"
+              style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+              <ChevronRight className="w-3.5 h-3.5 text-gray-500" />
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Match list */}
       {filteredMatches.length === 0 ? (
         <EmptyState hasMatches={matches.length > 0} />
       ) : (
         <div className="space-y-2">
-          {[...filteredMatches]
-            .sort((a, b) => b.id - a.id)
-            .map(match => (
-              <MatchAdminCard
-                key={match.id}
-                match={match}
-                players={players}
-                onDelete={() =>
-                  onSetMatches(prev => prev.filter(m => m.id !== match.id))
-                }
-                onStatsSaved={onRefreshMatches}
-              />
-            ))}
+          {paginatedMatches.map(match => (
+            <MatchAdminCard
+              key={match.id}
+              match={match}
+              players={players}
+              onDelete={() =>
+                onSetMatches(prev => prev.filter(m => m.id !== match.id))
+              }
+              onStatsSaved={onRefreshMatches}
+            />
+          ))}
         </div>
       )}
     </div>
