@@ -15,16 +15,19 @@ export function DashboardMetricsPanel({ seasonId }: { seasonId: number }) {
 
   if (!metrics) return null;
 
+  const totalMatches = metrics.totalMatches ?? 0;
+  const recentActivity = metrics.recentActivity ?? [];
+  const byStatus = metrics.matchesByStatus ?? {};
+
   const statCards = [
-    { icon: <UserCheck className="w-4 h-4" />, label: 'Draft Players', value: metrics.totalParticipants, color: '#22C55E' },
-    { icon: <Shield className="w-4 h-4" />, label: 'Team Picks', value: metrics.totalTeamPicks, color: '#3B82F6' },
-    { icon: <Gamepad2 className="w-4 h-4" />, label: 'Total Matches', value: metrics.totalMatches, color: '#F59E0B' },
-    { icon: <ClipboardList className="w-4 h-4" />, label: 'Stat Entries', value: metrics.totalStatRows, color: '#A855F7' },
+    { icon: <UserCheck className="w-4 h-4" />, label: 'Draft Players', value: metrics.totalParticipants ?? 0, color: '#22C55E' },
+    { icon: <Shield className="w-4 h-4" />, label: 'Team Picks', value: metrics.totalTeamPicks ?? 0, color: '#3B82F6' },
+    { icon: <Gamepad2 className="w-4 h-4" />, label: 'Total Matches', value: totalMatches, color: '#F59E0B' },
+    { icon: <ClipboardList className="w-4 h-4" />, label: 'Stat Entries', value: metrics.totalStatRows ?? 0, color: '#A855F7' },
   ];
 
   const statusLabels = ['upcoming', 'live', 'completed', 'postponed'] as const;
   const statusColors = { upcoming: '#6B7280', live: '#22C55E', completed: '#3B82F6', postponed: '#EF4444' };
-  const byStatus = metrics.matchesByStatus || {};
 
   const chartData = {
     labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
@@ -77,7 +80,7 @@ export function DashboardMetricsPanel({ seasonId }: { seasonId: number }) {
         <div className="rounded-xl p-4" style={{ background: '#0d1017', border: '1px solid rgba(255,255,255,0.08)' }}>
           <h4 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Matches by Status</h4>
 
-          {metrics.totalMatches > 0 ? (
+          {totalMatches > 0 ? (
             <div className="flex items-center gap-4">
               <div className="w-28 h-28 flex-shrink-0">
                 <Doughnut data={chartData} options={chartOptions} />
@@ -105,11 +108,11 @@ export function DashboardMetricsPanel({ seasonId }: { seasonId: number }) {
           <h4 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <Activity className="w-3 h-3" /> Recent Activity
           </h4>
-          {metrics.recentActivity.length === 0 ? (
+          {recentActivity.length === 0 ? (
             <p className="text-gray-700 text-xs">No activity yet</p>
           ) : (
             <div className="space-y-2">
-              {metrics.recentActivity.map((a, i) => (
+              {recentActivity.map((a, i) => (
                 <div key={i} className="flex items-start gap-2 text-xs">
                   <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
                   <div className="min-w-0">
