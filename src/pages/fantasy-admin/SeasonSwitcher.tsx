@@ -22,9 +22,13 @@ export function SeasonSwitcher({ allSeasons, selectedSeasonId, onSwitch, compact
     <div className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className={`flex items-center gap-2 rounded-xl font-bold transition-all hover:bg-white/5 ${compact ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}`}
-        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: statusCfg.color }} />
+        className={`flex items-center gap-2 rounded-xl font-bold transition-all hover:bg-white/5 ${compact ? 'px-2.5 py-1.5 text-xs' : 'px-3.5 py-2.5 text-sm'}`}
+        style={{
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.1) 100%)',
+          border: '1px solid rgba(255,255,255,0.06)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+        }}>
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: statusCfg.color, boxShadow: `0 0 6px ${statusCfg.color}60` }} />
         <span className="text-white truncate max-w-[180px]">
           {current?.full_name || 'Select Season'}
         </span>
@@ -34,9 +38,16 @@ export function SeasonSwitcher({ allSeasons, selectedSeasonId, onSwitch, compact
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-full mt-1 w-72 rounded-xl py-1 shadow-2xl z-50"
-            style={{ background: '#1a1d24', border: '1px solid rgba(255,255,255,0.12)' }}>
-            <div className="px-3 py-2 border-b border-white/5">
+          <div className="absolute left-0 top-full mt-1.5 w-72 rounded-2xl py-1 shadow-2xl z-50 overflow-hidden"
+            style={{
+              background: 'linear-gradient(180deg, rgba(13,16,23,0.98) 0%, rgba(7,9,15,0.99) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
+            }}>
+            {/* Top highlight */}
+            <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)' }} />
+
+            <div className="px-3.5 py-2.5 border-b border-white/5">
               <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">All Seasons ({allSeasons.length})</span>
             </div>
             {allSeasons.map(s => {
@@ -46,16 +57,20 @@ export function SeasonSwitcher({ allSeasons, selectedSeasonId, onSwitch, compact
                 <button
                   key={s.id}
                   onClick={() => { onSwitch(s.id); setOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${isSelected ? 'bg-amber-500/10' : 'hover:bg-white/5'}`}>
-                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: cfg.color }} />
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-left transition-colors ${isSelected ? 'bg-amber-500/10' : 'hover:bg-white/5'}`}>
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: cfg.color, boxShadow: `0 0 6px ${cfg.color}40` }} />
                   <div className="flex-1 min-w-0">
                     <div className={`text-sm font-bold truncate ${isSelected ? 'text-amber-400' : 'text-white'}`}>
                       {s.full_name}
                     </div>
                     <div className="text-[10px] text-gray-600">{s.dates}</div>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.border} border`}
-                    style={{ color: cfg.color }}>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
+                    style={{
+                      background: `${cfg.color}15`,
+                      borderColor: `${cfg.color}30`,
+                      color: cfg.color,
+                    }}>
                     {cfg.label}
                   </span>
                 </button>

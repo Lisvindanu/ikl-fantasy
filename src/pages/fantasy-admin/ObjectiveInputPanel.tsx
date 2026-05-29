@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Droplets, Shield, Skull, Crown, Waves, BarChart2, Check, Save } from 'lucide-react';
 import * as fantasyApi from '../../api/fantasy';
 import type { IKLMatch } from '../../api/fantasy';
+import { Input } from './shared';
 
 interface ObjectiveField {
   key: string;
@@ -62,9 +63,10 @@ export function ObjectiveInputPanel({ match, onSaved }: Props) {
   }
 
   return (
-    <div className="mt-3 pt-3 border-t border-white/5 space-y-2">
-      <div className="text-xs font-black uppercase tracking-widest text-cyan-500 mb-2">
-        Match Objectives
+    <div className="mt-3 pt-3 border-t border-white/5 space-y-2.5">
+      <div className="flex items-center gap-1.5 text-cyan-400 mb-2">
+        <Waves className="w-3.5 h-3.5" />
+        <span className="text-xs font-black uppercase tracking-widest">Match Objectives</span>
       </div>
 
       {OBJECTIVES.map(obj => {
@@ -81,9 +83,12 @@ export function ObjectiveInputPanel({ match, onSaved }: Props) {
                   onClick={() => setPicks(p => ({ ...p, [obj.key]: picked === t.id ? null : t.id }))}
                   className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all"
                   style={{
-                    background: picked === t.id ? `${t.color}30` : 'rgba(255,255,255,0.08)',
-                    color: picked === t.id ? t.color : '#D1D5DB',
-                    border: picked === t.id ? `2px solid ${t.color}60` : '1px solid rgba(255,255,255,0.15)',
+                    background: picked === t.id
+                      ? `${t.color}30`
+                      : 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.15) 100%)',
+                    color: picked === t.id ? t.color : '#9CA3AF',
+                    border: picked === t.id ? `2px solid ${t.color}60` : '1px solid rgba(255,255,255,0.08)',
+                    boxShadow: picked === t.id ? `0 0 12px -4px ${t.color}40` : 'none',
                   }}>
                   {t.short}
                 </button>
@@ -100,11 +105,10 @@ export function ObjectiveInputPanel({ match, onSaved }: Props) {
           <BarChart2 className="w-3.5 h-3.5" />
           <span className="text-xs font-bold">O/U Line</span>
         </div>
-        <input type="number" min={0} max={200} value={overUnderLine}
+        <Input type="number" min={0} max={200} value={overUnderLine}
           onChange={e => setOverUnderLine(e.target.value)}
           placeholder="e.g. 25"
-          className="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white outline-none"
-          style={{ background: '#07090f', border: '1px solid rgba(255,255,255,0.1)' }} />
+          className="flex-1 !py-1.5 !text-xs" />
       </div>
 
       {msg && (
@@ -112,7 +116,7 @@ export function ObjectiveInputPanel({ match, onSaved }: Props) {
       )}
 
       <button onClick={saveObjectives} disabled={saving}
-        className="px-4 py-1.5 rounded-lg text-xs font-bold text-black transition-opacity disabled:opacity-60 flex items-center gap-1.5"
+        className="px-4 py-1.5 rounded-xl text-xs font-bold text-black transition-opacity disabled:opacity-60 flex items-center gap-1.5"
         style={{ background: 'linear-gradient(135deg,#06B6D4,#0891B2)' }}>
         <Save className="w-3 h-3" />
         {saving ? 'Saving...' : 'Save Objectives'}
