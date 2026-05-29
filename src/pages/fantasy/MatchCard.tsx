@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Trophy, Swords, Play } from 'lucide-react';
 import { RolePill } from '../../components/fantasy/RolePill';
 import type { Role } from '../../components/fantasy/types';
-import type { IKLMatch, MatchPlayerStat, MatchPreview } from '../../api/fantasy';
+import type { IKLMatch, MatchPlayerStat, MatchPreview, VodTimestamp } from '../../api/fantasy';
 import * as fantasyApi from '../../api/fantasy';
 import { API } from '../../api/fantasy';
 import { MatchComments } from './MatchComments';
@@ -28,7 +28,7 @@ function ScoreBox({ score, isWinner, color }: { score: number; isWinner: boolean
   );
 }
 
-export function GameStatsRow({ stats, gameNumber, isUltimateBattle }: { stats: MatchPlayerStat[]; gameNumber: number; isUltimateBattle?: boolean }) {
+export function GameStatsRow({ stats, gameNumber, isUltimateBattle, vodLink }: { stats: MatchPlayerStat[]; gameNumber: number; isUltimateBattle?: boolean; vodLink?: { url: string; timestamp: string } }) {
   const game = stats.filter(s => s.game_number === gameNumber);
   if (!game.length) return null;
 
@@ -46,6 +46,15 @@ export function GameStatsRow({ stats, gameNumber, isUltimateBattle }: { stats: M
           <span className="bg-gradient-to-r from-red-600 via-amber-500 to-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">
             ULTIMATE BATTLE
           </span>
+        )}
+        {vodLink && (
+          <a href={`${vodLink.url}${vodLink.url.includes('?') ? '&' : '?'}t=${vodLink.timestamp}`}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold normal-case tracking-normal hover:opacity-80 transition-opacity"
+            style={{ background: 'rgba(239,68,68,0.12)', color: '#F87171', border: '1px solid rgba(239,68,68,0.2)' }}
+            onClick={e => e.stopPropagation()}>
+            <Play className="w-3 h-3" /> {vodLink.timestamp}
+          </a>
         )}
       </div>
       <div className="overflow-x-auto rounded-xl" style={{ background: '#07090f', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -180,7 +189,7 @@ export function MatchCard({ match }: { match: IKLMatch }) {
                   match.status === 'postponed' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30' :
                   'bg-white/5 text-gray-500 border border-white/10'
                 }`}>
-                  {match.status === 'live' && '● '}{match.status}
+                  {match.status === 'live' && '● '}{match.status === 'upcoming' ? 'Segera' : match.status === 'postponed' ? 'Ditunda' : match.status === 'live' ? 'LIVE' : match.status}
                 </span>
               )}
             </div>
@@ -216,7 +225,7 @@ export function MatchCard({ match }: { match: IKLMatch }) {
               <ScoreBox score={match.team1_score} isWinner={match.winner_team_id === match.team1_id} color={match.team1_color} />
               <div className="flex flex-col items-center">
                 <Swords className="w-3.5 h-3.5 text-gray-700" />
-                {!hasWinner && <span className="text-xs text-gray-700 mt-0.5">TBD</span>}
+                {!hasWinner && <span className="text-xs text-gray-700 mt-0.5">Belum dimulai</span>}
               </div>
               <ScoreBox score={match.team2_score} isWinner={match.winner_team_id === match.team2_id} color={match.team2_color} />
             </div>
@@ -307,9 +316,10 @@ export function MatchCard({ match }: { match: IKLMatch }) {
                 </div>
               ) : stats && stats.length > 0 ? (
                 <>
-                  {Array.from({ length: totalGames }, (_, i) => i + 1).map(g => (
-                    <GameStatsRow key={g} stats={stats} gameNumber={g} isUltimateBattle={isBO7 && g === 7} />
-                  ))}
+                  {Array.from({ length: totalGames }, (_, i) => i + 1).map(g => {
+                    const vts = match.vod_timestamps?.find((v: VodTimestamp) => v.game === g);
+                    return <GameStatsRow key={g} stats={stats} gameNumber={g} isUltimateBattle={isBO7 && g === 7} vodLink={vts ? { url: vts.url, timestamp: vts.timestamp } : undefined} />;
+                  })}
                   {/* Post-match recap */}
                   {hasWinner && (() => {
                     const mvps = stats.filter(s => s.is_mvp);

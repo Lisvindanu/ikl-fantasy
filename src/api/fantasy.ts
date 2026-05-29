@@ -129,6 +129,13 @@ export interface LeaderboardResponse {
   total: number;
 }
 
+export interface VodTimestamp {
+  game: number;
+  url: string;
+  timestamp: string;
+  label?: string;
+}
+
 export interface IKLMatch {
   id: number;
   season_id: number;
@@ -153,6 +160,7 @@ export interface IKLMatch {
   winner_name: string | null;
   winner_short: string | null;
   vod_url: string | null;
+  vod_timestamps: VodTimestamp[] | null;
   created_at: string;
   first_blood_team_id: number | null;
   first_tower_team_id: number | null;

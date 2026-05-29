@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Swords, Trophy, Radio, Target, Zap, BarChart3, X, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { IKLMatch, IKLPlayer, IKLTeam, MatchPlayerStat, MatchPreview } from '../../api/fantasy';
+import type { IKLMatch, IKLPlayer, IKLTeam, MatchPlayerStat, MatchPreview, VodTimestamp } from '../../api/fantasy';
 import { getMatches, getMatchStats, getMatchPreview, API } from '../../api/fantasy';
 import { STAGE_LABEL, GameStatsRow, FormDots } from './MatchCard';
 import { PredictionCard } from './PredictionCard';
@@ -50,17 +50,25 @@ function MatchRow({ match, onClick, isSelected }: { match: IKLMatch; onClick?: (
       {/* Score */}
       <div className="flex items-center gap-1.5 px-2 py-2 flex-shrink-0"
         style={{ background: 'rgba(255,255,255,0.02)', minWidth: '48px', justifyContent: 'center' }}>
-        <span className={`font-black tabular-nums ${t1Win ? 'text-white' : 'text-gray-600'}`}>
-          {match.team1_score}
-        </span>
-        {isLive ? (
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+        {match.status === 'upcoming' ? (
+          <span className="text-[9px] text-blue-400 font-bold uppercase">Segera</span>
+        ) : match.status === 'postponed' ? (
+          <span className="text-[9px] text-yellow-400 font-bold uppercase">Ditunda</span>
         ) : (
-          <span className="text-gray-700 text-[10px]">&middot;</span>
+          <>
+            <span className={`font-black tabular-nums ${t1Win ? 'text-white' : 'text-gray-600'}`}>
+              {match.team1_score}
+            </span>
+            {isLive ? (
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+            ) : (
+              <span className="text-gray-700 text-[10px]">&middot;</span>
+            )}
+            <span className={`font-black tabular-nums ${t2Win ? 'text-white' : 'text-gray-600'}`}>
+              {match.team2_score}
+            </span>
+          </>
         )}
-        <span className={`font-black tabular-nums ${t2Win ? 'text-white' : 'text-gray-600'}`}>
-          {match.team2_score}
-        </span>
       </div>
 
       {/* Team 2 */}
@@ -85,31 +93,35 @@ function WeekCard({ week, matches, onMatchClick, selectedMatchId }: { week: numb
   const byDate: Record<string, IKLMatch[]> = {};
   for (const m of matches) {
     const date = m.match_date
-      ? new Date(m.match_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-      : 'TBD';
+      ? new Date(m.match_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'Jadwal menyusul';
     if (!byDate[date]) byDate[date] = [];
     byDate[date].push(m);
   }
 
   const primaryStage = matches[0]?.stage;
   const isPlayoff = primaryStage && primaryStage !== 'regular';
+  const isFinal = primaryStage === 'final' || primaryStage === 'grand_final';
   const title = isPlayoff
     ? (STAGE_LABEL[primaryStage] || `Week ${week}`)
     : `Week ${week}`;
 
   return (
-    <div className="rounded-xl overflow-hidden"
+    <div className={`rounded-xl overflow-hidden ${isFinal ? 'ring-1 ring-amber-500/40 shadow-lg shadow-amber-500/10' : ''}`}
       style={{
-        background: '#0d1017',
-        border: `1px solid ${isPlayoff ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)'}`,
+        background: isFinal ? '#0f0f14' : '#0d1017',
+        border: `1px solid ${isFinal ? 'rgba(245,158,11,0.35)' : isPlayoff ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)'}`,
       }}>
       <div className="px-3 py-2 text-center flex items-center justify-center gap-1.5"
         style={{
-          background: isPlayoff ? 'rgba(245,158,11,0.06)' : 'rgba(255,255,255,0.03)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: isFinal
+            ? 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(234,179,8,0.08) 100%)'
+            : isPlayoff ? 'rgba(245,158,11,0.06)' : 'rgba(255,255,255,0.03)',
+          borderBottom: `1px solid ${isFinal ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.06)'}`,
         }}>
-        {isPlayoff && <Trophy className="w-3 h-3 text-amber-400" />}
-        <span className={`text-xs font-black ${isPlayoff ? 'text-amber-400' : 'text-gray-400'}`}>{title}</span>
+        {isPlayoff && <Trophy className={`w-3.5 h-3.5 ${isFinal ? 'text-yellow-400' : 'text-amber-400'}`} />}
+        <span className={`text-xs font-black uppercase tracking-wider ${isFinal ? 'text-yellow-400' : isPlayoff ? 'text-amber-400' : 'text-gray-400'}`}>{title}</span>
+        {isFinal && <Trophy className="w-3.5 h-3.5 text-yellow-400" />}
       </div>
 
       {Object.entries(byDate).map(([date, dateMatches]) => (
@@ -435,9 +447,10 @@ function MatchDetailModal({ match, onClose }: { match: IKLMatch; onClose: () => 
             <div className="py-8 flex justify-center"><div className="w-5 h-5 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" /></div>
           ) : stats && stats.length > 0 ? (
             <>
-              {Array.from({ length: totalGames }, (_, i) => i + 1).map(g => (
-                <GameStatsRow key={g} stats={stats} gameNumber={g} isUltimateBattle={isBO7 && g === 7} />
-              ))}
+              {Array.from({ length: totalGames }, (_, i) => i + 1).map(g => {
+                const vts = match.vod_timestamps?.find((v: VodTimestamp) => v.game === g);
+                return <GameStatsRow key={g} stats={stats} gameNumber={g} isUltimateBattle={isBO7 && g === 7} vodLink={vts ? { url: vts.url, timestamp: vts.timestamp } : undefined} />;
+              })}
               {/* Match Recap */}
               {hasWinner && (() => {
                 const mvps = stats.filter(s => s.is_mvp);
