@@ -194,6 +194,32 @@ export async function sendWeeklyRecap(seasonId: number): Promise<{ sent: number 
   return d;
 }
 
+// ── Admin: dynamic prices ───────────────────────────────────────────────────
+
+export async function adminUpdatePrices(seasonId: number): Promise<{ updated: number }> {
+  const r = await fetch(`${API}/api/fantasy/admin/seasons/${seasonId}/update-prices`, {
+    method: 'POST',
+    headers: authHeader(),
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Failed to update prices');
+  return d;
+}
+
+// ── Admin: seed IKL data ────────────────────────────────────────────────────
+
+export async function adminSeedIklFull(): Promise<{ seasonId: number; teams: number; players: number }> {
+  const r = await fetch(`${API}/api/fantasy/admin/seed-ikl-full`, {
+    method: 'POST',
+    headers: authHeader(),
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Failed to seed IKL data');
+  return d;
+}
+
+// ── Admin: CSV import stats ─────────────────────────────────────────────────
+
 export async function adminCsvImportStats(matchId: number, gameNumber: number, csv: string): Promise<{ ok: boolean; imported: number; errors: string[] }> {
   const r = await fetch(`${API}/api/fantasy/admin/matches/${matchId}/csv-import`, {
     method: 'POST',
