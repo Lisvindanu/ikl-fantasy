@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Users, Swords, Trophy, Globe, Shield, ChevronDown, ArrowLeft, Wallet, Star, Crown } from 'lucide-react';
+import { Users, Swords, Trophy, Globe, Shield, ChevronDown, ArrowLeft, Wallet, Star, Crown, UserRound } from 'lucide-react';
 import type { Tab, Role } from '../../components/fantasy/types';
 import { BUDGET } from '../../components/fantasy/types';
 import type { IKLSeason, IKLPlayer } from '../../api/fantasy';
@@ -13,6 +13,7 @@ function NavIcon({ id, className = 'w-4 h-4' }: { id: Tab; className?: string })
     case 'leaderboard': return <Trophy className={className} />;
     case 'leagues': return <Globe className={className} />;
     case 'team': return <Shield className={className} />;
+    case 'players': return <UserRound className={className} />;
     default: return null;
   }
 }
@@ -23,6 +24,7 @@ interface NavItem { id: Tab; label: string }
 
 const DRAFT_NAV: NavItem[] = [
   { id: 'draft', label: 'Squad' },
+  { id: 'players', label: 'Players' },
   { id: 'matches', label: 'Matches' },
   { id: 'leaderboard', label: 'Ranking' },
   { id: 'leagues', label: 'Leagues' },
@@ -38,6 +40,7 @@ const TEAM_NAV: NavItem[] = [
 const BOTH_NAV: NavItem[] = [
   { id: 'draft', label: 'Squad' },
   { id: 'team', label: 'My Team' },
+  { id: 'players', label: 'Players' },
   { id: 'matches', label: 'Matches' },
   { id: 'leaderboard', label: 'Ranking' },
   { id: 'leagues', label: 'Leagues' },

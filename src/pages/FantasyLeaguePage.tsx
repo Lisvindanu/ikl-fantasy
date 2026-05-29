@@ -224,7 +224,7 @@ export function FantasyLeaguePage() {
 
               {data.tab === 'matches' && (
                 <motion.div key="matches" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                  <MatchesTab matches={data.matches} loading={false} seasonId={season?.id} players={data.players} isAuthenticated={data.isAuthenticated} />
+                  <MatchesTab matches={data.matches} loading={false} seasonId={season?.id} players={data.players} isAuthenticated={data.isAuthenticated} teams={season?.teams || []} />
                 </motion.div>
               )}
 
