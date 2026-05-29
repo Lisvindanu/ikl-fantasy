@@ -110,6 +110,41 @@ export function FantasyAdminPage() {
     tools: () => <ToolsSection {...sectionProps} />,
   };
 
+  function renderContent() {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+        </div>
+      );
+    }
+    if (!season) {
+      return (
+        <div className="py-20 text-center px-4">
+          <Database className="w-12 h-12 text-gray-700 mx-auto mb-3" />
+          <p className="text-white font-black text-lg mb-2">No Season Found</p>
+          <p className="text-gray-500 text-sm mb-6">Seed the first season to get started.</p>
+          <button onClick={handleSeedIkl} disabled={seeding}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-black disabled:opacity-50"
+            style={{ background: 'linear-gradient(135deg,#FBBF24,#F59E0B)', boxShadow: '0 4px 16px rgba(245,158,11,0.25)' }}>
+            <Database className="w-4 h-4" />
+            {seeding ? 'Seeding...' : 'Seed IKL Spring 2026'}
+          </button>
+          {seedMsg && <p className={`text-xs font-bold mt-4 ${seedMsg.includes('Seeded') ? 'text-green-400' : 'text-red-400'}`}>{seedMsg}</p>}
+        </div>
+      );
+    }
+    return (
+      <div className="px-4 lg:px-8 py-6 lg:py-8 max-w-5xl">
+        <div className="mb-6">
+          <h2 className="text-xl font-black text-white tracking-tight">{SECTION_TITLES[activeSection]}</h2>
+          <p className="text-gray-600 text-xs mt-0.5 font-medium">{season.full_name}</p>
+        </div>
+        {SECTION_RENDERERS[activeSection]()}
+      </div>
+    );
+  }
+
   return (
     <div className="admin-shell min-h-screen text-white" style={{ background: '#07090f' }}>
 
@@ -161,11 +196,16 @@ export function FantasyAdminPage() {
         )}
       </div>
 
+      {/* ── Mobile content ───────────────────────────────────────────────── */}
+      <div className="lg:hidden">
+        {renderContent()}
+      </div>
+
       {/* ── Desktop layout ─────────────────────────────────────────────── */}
-      <div className="flex min-h-screen">
+      <div className="hidden lg:flex h-screen overflow-hidden">
 
         {/* Sidebar */}
-        <aside className="hidden lg:flex flex-col w-[240px] flex-shrink-0 sticky top-0 h-screen"
+        <aside className="flex flex-col w-[240px] flex-shrink-0"
           style={{
             background: 'linear-gradient(180deg, #0c0f18 0%, #080a11 100%)',
             borderRight: '1px solid rgba(255,255,255,0.04)',
@@ -234,33 +274,8 @@ export function FantasyAdminPage() {
         </aside>
 
         {/* Content */}
-        <main className="flex-1 min-w-0">
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
-            </div>
-          ) : !season ? (
-            <div className="py-20 text-center px-4">
-              <Database className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-              <p className="text-white font-black text-lg mb-2">No Season Found</p>
-              <p className="text-gray-500 text-sm mb-6">Seed the first season to get started.</p>
-              <button onClick={handleSeedIkl} disabled={seeding}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-black disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg,#FBBF24,#F59E0B)', boxShadow: '0 4px 16px rgba(245,158,11,0.25)' }}>
-                <Database className="w-4 h-4" />
-                {seeding ? 'Seeding...' : 'Seed IKL Spring 2026'}
-              </button>
-              {seedMsg && <p className={`text-xs font-bold mt-4 ${seedMsg.includes('Seeded') ? 'text-green-400' : 'text-red-400'}`}>{seedMsg}</p>}
-            </div>
-          ) : (
-            <div className="px-4 lg:px-8 py-6 lg:py-8 max-w-5xl">
-              <div className="mb-6">
-                <h2 className="text-xl font-black text-white tracking-tight">{SECTION_TITLES[activeSection]}</h2>
-                <p className="text-gray-600 text-xs mt-0.5 font-medium">{season.full_name}</p>
-              </div>
-              {SECTION_RENDERERS[activeSection]()}
-            </div>
-          )}
+        <main className="flex-1 min-w-0 overflow-y-auto">
+          {renderContent()}
         </main>
       </div>
 

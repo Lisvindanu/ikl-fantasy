@@ -40,6 +40,8 @@ export function useFantasyData() {
   const [tab, setTab] = useState<
     'overview' | 'draft' | 'players' | 'leaderboard' | 'matches' | 'team' | 'leagues' | 'predictions' | 'achievements' | 'compare' | 'meta'
   >(spectateLeagueId ? 'leagues' : 'overview');
+  const [allSeasons, setAllSeasons] = useState<IKLSeason[]>([]);
+  const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
   const [season, setSeason] = useState<(IKLSeason & { teams: IKLTeam[] }) | null>(null);
   const [players, setPlayers] = useState<IKLPlayer[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -74,22 +76,31 @@ export function useFantasyData() {
   const [showUndo, setShowUndo] = useState(false);
   const [loginStreak, setLoginStreak] = useState<LoginStreakInfo | null>(null);
 
+  // Load all seasons once
   useEffect(() => {
+    fantasyApi.getSeasons().then(seasons => {
+      setAllSeasons(seasons);
+      if (seasons.length > 0) setSelectedSeasonId(seasons[0].id);
+      else setLoading(false);
+    }).catch(e => { console.error(e); setLoading(false); });
+  }, []);
+
+  // Load season data when selectedSeasonId or auth changes
+  useEffect(() => {
+    if (!selectedSeasonId) return;
     let cancelled = false;
+    setLoading(true);
     (async () => {
       try {
-        const seasons = await fantasyApi.getSeasons();
-        if (cancelled) return;
-        if (!seasons.length) { setLoading(false); return; }
         const [s, p, lb, m, tlb, meta, own, frm] = await Promise.all([
-          fantasyApi.getSeasonDetail(seasons[0].id),
-          fantasyApi.getPlayers(seasons[0].id),
-          fantasyApi.getLeaderboard(seasons[0].id),
-          fantasyApi.getMatches(seasons[0].id),
-          fantasyApi.getTeamLeaderboard(seasons[0].id).catch(() => []),
-          fantasyApi.getSeasonMeta(seasons[0].id).catch(() => null),
-          fantasyApi.getPlayerOwnership(seasons[0].id).catch(() => null),
-          fantasyApi.getPlayerForm(seasons[0].id).catch(() => []),
+          fantasyApi.getSeasonDetail(selectedSeasonId),
+          fantasyApi.getPlayers(selectedSeasonId),
+          fantasyApi.getLeaderboard(selectedSeasonId),
+          fantasyApi.getMatches(selectedSeasonId),
+          fantasyApi.getTeamLeaderboard(selectedSeasonId).catch(() => []),
+          fantasyApi.getSeasonMeta(selectedSeasonId).catch(() => null),
+          fantasyApi.getPlayerOwnership(selectedSeasonId).catch(() => null),
+          fantasyApi.getPlayerForm(selectedSeasonId).catch(() => []),
         ]);
         if (cancelled) return;
         setSeason(s);
@@ -100,10 +111,19 @@ export function useFantasyData() {
         setSeasonMeta(meta);
         if (own) setOwnershipData(own);
         if (Array.isArray(frm)) setFormData(frm);
+
+        // Reset draft state for fresh season load
+        setPicks({ EXP: null, JGL: null, MID: null, GOLD: null, ROAM: null });
+        setBenchPicks([null, null]);
+        setTeamName('My Fantasy Team');
+        setCaptainId(null);
+        setViceCaptainId(null);
+        setMyTeamSelection(null);
+
         if (isAuthenticated) {
           const [mt, mts] = await Promise.all([
-            fantasyApi.getMyTeam(seasons[0].id).catch(() => null),
-            fantasyApi.getMyTeamSelection(seasons[0].id).catch(() => null),
+            fantasyApi.getMyTeam(selectedSeasonId).catch(() => null),
+            fantasyApi.getMyTeamSelection(selectedSeasonId).catch(() => null),
           ]);
           if (cancelled) return;
           if (mt?.picks?.length) {
@@ -131,7 +151,7 @@ export function useFantasyData() {
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [isAuthenticated]);
+  }, [selectedSeasonId, isAuthenticated]);
 
   // #119: Record daily login streak when authenticated (once per session)
   useEffect(() => {
@@ -302,6 +322,16 @@ export function useFantasyData() {
   );
   const maxPts = sortedByPts[0]?.fantasy_pts || 1;
 
+  const userRank = useMemo(() => {
+    if (!user || !leaderboard.length) return null;
+    const idx = leaderboard.findIndex(e => e.user_id === Number(user.id));
+    return idx >= 0 ? idx + 1 : null;
+  }, [leaderboard, user]);
+
+  function switchSeason(id: number) {
+    setSelectedSeasonId(id);
+  }
+
   const draftProps = {
     picks, setPicks,
     activeRole, setActiveRole,
@@ -327,6 +357,8 @@ export function useFantasyData() {
     season, players, leaderboard, matches, seasonMeta,
     myTeamSelection, setMyTeamSelection, teamLeaderboard, setTeamLeaderboard,
     loading,
+    // Season switcher
+    allSeasons, selectedSeasonId, switchSeason, userRank,
     // Tab / mode
     tab, setTab, showModeSelector, setShowModeSelector, activeMode, handleModeSelect,
     // Draft state

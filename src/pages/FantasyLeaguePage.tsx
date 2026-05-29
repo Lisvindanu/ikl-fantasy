@@ -5,7 +5,7 @@ import { useFantasyData } from './fantasy/useFantasyData';
 import { OnboardingTour } from '../components/fantasy/OnboardingTour';
 import { FantasyLoadingSkeleton, FantasyNoSeason } from './fantasy/FantasyLoadingStates';
 import { FantasyHeroBanner } from './fantasy/FantasyHeroBanner';
-import { DesktopTabNav, MobileBottomNav } from './fantasy/FantasyTabNav';
+import { DesktopTabNav, MobileBottomNav, StatsBar, MobileTopHeader } from './fantasy/FantasyTabNav';
 import { ConfettiOverlay, UndoToast, PlayerDetailOverlay, ConfirmSaveDialog } from './fantasy/FantasyOverlays';
 import { ModeSelector } from './fantasy/ModeSelector';
 import { StandingsTab } from './fantasy/StandingsTab';
@@ -121,12 +121,13 @@ export function FantasyLeaguePage() {
         captainId={data.captainId}
       />
 
-      <FantasyHeroBanner season={season} players={data.players} loginStreak={data.loginStreak} />
-
       {data.showModeSelector ? (
-        <div className="container mx-auto px-4">
-          <ModeSelector meta={data.seasonMeta} onSelect={data.handleModeSelect} />
-        </div>
+        <>
+          <FantasyHeroBanner season={season} players={data.players} loginStreak={data.loginStreak} />
+          <div className="container mx-auto px-4">
+            <ModeSelector meta={data.seasonMeta} onSelect={data.handleModeSelect} />
+          </div>
+        </>
       ) : (
         <>
           <DesktopTabNav
@@ -134,8 +135,27 @@ export function FantasyLeaguePage() {
             setTab={data.setTab}
             activeMode={data.activeMode}
             onBackToModeSelector={() => data.setShowModeSelector(true)}
+            allSeasons={data.allSeasons}
+            selectedSeasonId={data.selectedSeasonId}
+            onSwitchSeason={data.switchSeason}
+          />
+          <StatsBar
+            activeMode={data.activeMode}
+            budgetLeft={data.budgetLeft}
+            totalPts={data.totalPts}
+            filledCount={data.filledCount}
+            captainId={data.captainId}
+            picks={data.picks}
+            rank={data.userRank}
           />
 
+          <MobileTopHeader
+            activeMode={data.activeMode}
+            onBackToModeSelector={() => data.setShowModeSelector(true)}
+            allSeasons={data.allSeasons}
+            selectedSeasonId={data.selectedSeasonId}
+            onSwitchSeason={data.switchSeason}
+          />
           <MobileBottomNav
             tab={data.tab}
             setTab={data.setTab}
