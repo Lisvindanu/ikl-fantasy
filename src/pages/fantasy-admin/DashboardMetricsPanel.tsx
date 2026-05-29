@@ -24,11 +24,12 @@ export function DashboardMetricsPanel({ seasonId }: { seasonId: number }) {
 
   const statusLabels = ['upcoming', 'live', 'completed', 'postponed'] as const;
   const statusColors = { upcoming: '#6B7280', live: '#22C55E', completed: '#3B82F6', postponed: '#EF4444' };
+  const byStatus = metrics.matchesByStatus || {};
 
   const chartData = {
     labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
     datasets: [{
-      data: statusLabels.map(s => metrics.matchesByStatus[s] || 0),
+      data: statusLabels.map(s => byStatus[s] || 0),
       backgroundColor: statusLabels.map(s => `${statusColors[s]}30`),
       borderColor: statusLabels.map(s => statusColors[s]),
       borderWidth: 2,
@@ -83,7 +84,7 @@ export function DashboardMetricsPanel({ seasonId }: { seasonId: number }) {
               </div>
               <div className="space-y-2 flex-1">
                 {statusLabels.map(s => {
-                  const cnt = metrics.matchesByStatus[s] || 0;
+                  const cnt = byStatus[s] || 0;
                   const color = statusColors[s];
                   return (
                     <div key={s} className="flex items-center gap-2">
