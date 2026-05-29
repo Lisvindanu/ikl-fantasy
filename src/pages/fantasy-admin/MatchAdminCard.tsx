@@ -1,9 +1,17 @@
 import { useState } from 'react';
-import { Trash2, ChevronDown, Check, X, FileUp, Calendar } from 'lucide-react';
+import { Trash2, ChevronDown, Check, X, FileUp, Calendar, CircleDot, Clock, CheckCircle2, AlertTriangle } from 'lucide-react';
 import * as fantasyApi from '../../api/fantasy';
 import type { IKLPlayer, IKLMatch, MatchPlayerStat } from '../../api/fantasy';
-import { AdminPanel, Input, STAGE_LABEL, type StatRow } from './shared';
+import { Input, STAGE_LABEL, type StatRow } from './shared';
 import { ObjectiveInputPanel } from './ObjectiveInputPanel';
+
+/* ── Status config ───────────────────────────────────────────────────────── */
+const STATUS_CFG: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
+  upcoming:  { color: '#F59E0B', label: 'Upcoming',  icon: <Clock className="w-3 h-3" /> },
+  live:      { color: '#22C55E', label: 'Live',       icon: <CircleDot className="w-3 h-3" /> },
+  completed: { color: '#3B82F6', label: 'Completed',  icon: <CheckCircle2 className="w-3 h-3" /> },
+  postponed: { color: '#EF4444', label: 'Postponed',  icon: <AlertTriangle className="w-3 h-3" /> },
+};
 
 /* ── Style constants ──────────────────────────────────────────────────────── */
 const KDA = {
@@ -127,6 +135,7 @@ export function MatchAdminCard({ match, players, onDelete, onStatsSaved }: {
   const [csvMsg, setCsvMsg] = useState('');
 
   const matchPlayers = players.filter(p => p.team_id === match.team1_id || p.team_id === match.team2_id);
+  const status = STATUS_CFG[match.status] ?? STATUS_CFG.upcoming;
 
   async function toggleExpand() {
     if (!expanded && !existingStats) {
@@ -183,57 +192,107 @@ export function MatchAdminCard({ match, players, onDelete, onStatsSaved }: {
     : match.winner_team_id === match.team2_id ? match.team2_color : '#6B7280';
 
   return (
-    <AdminPanel>
+    <div className="relative rounded-2xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(13,16,23,0.95) 0%, rgba(7,9,15,0.98) 100%)',
+        border: '1px solid rgba(255,255,255,0.06)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+      }}>
+      {/* Status accent bar — left edge */}
+      <div className="absolute left-0 top-0 bottom-0 w-[3px]"
+        style={{ background: `linear-gradient(180deg, ${status.color}, ${status.color}60)` }} />
+      {/* Subtle top highlight */}
+      <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%)' }} />
+
       {/* ── Header ──────────────────────────────────────────────────── */}
-      <div className="p-4">
-        <div className="flex items-center justify-between gap-2">
-          <button onClick={toggleExpand} className="flex items-center gap-3 flex-1 min-w-0 text-left group">
-            {/* Stage badge */}
-            <span className="text-[10px] font-black uppercase tracking-[0.1em] px-2.5 py-1 rounded-lg flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.06))',
-                color: '#F59E0B', border: '1px solid rgba(245,158,11,0.18)' }}>
-              {STAGE_LABEL[match.stage] || match.stage}
-              <span className="text-amber-500/50 mx-1">|</span>W{match.week}
+      <button onClick={toggleExpand} className="w-full text-left group">
+        <div className="p-4 pl-5">
+          {/* Top row: status + stage + date + delete */}
+          <div className="flex items-center gap-2 mb-3">
+            {/* Status badge */}
+            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md"
+              style={{ background: `${status.color}12`, color: status.color, border: `1px solid ${status.color}20` }}>
+              {status.icon}
+              {status.label}
             </span>
-
-            {/* Teams + score */}
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="font-black text-sm" style={{ color: match.team1_color }}>{match.team1_short}</span>
-              <span className="font-black text-sm px-2 py-0.5 rounded-md"
-                style={{ background: 'rgba(255,255,255,0.04)', color: '#6B7280', border: '1px solid rgba(255,255,255,0.06)' }}>
-                {match.team1_score} - {match.team2_score}
+            {/* Stage + week */}
+            <span className="text-[10px] font-bold text-gray-600">
+              {STAGE_LABEL[match.stage] || match.stage} / W{match.week}
+            </span>
+            {/* Date */}
+            {match.match_date && (
+              <span className="text-[10px] text-gray-700 flex items-center gap-1 ml-auto mr-2">
+                <Calendar className="w-3 h-3" />
+                {new Date(match.match_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
               </span>
-              <span className="font-black text-sm" style={{ color: match.team2_color }}>{match.team2_short}</span>
-              {match.winner_team_id && (
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md flex-shrink-0"
-                  style={{ color: winnerColor, background: `${winnerColor}15`, border: `1px solid ${winnerColor}25` }}>
-                  {match.winner_short} WIN
-                </span>
-              )}
-            </div>
-
-            <ChevronDown className={`w-4 h-4 text-gray-700 flex-shrink-0 transition-transform duration-200 group-hover:text-gray-500 ${expanded ? 'rotate-180' : ''}`} />
-          </button>
-
-          <button onClick={handleDelete} disabled={deleting} title="Delete match"
-            className="p-2 rounded-lg text-gray-700 hover:text-red-400 hover:bg-red-500/10 transition-all flex-shrink-0">
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-
-        {match.match_date && (
-          <div className="flex items-center gap-1.5 mt-2 ml-0.5">
-            <Calendar className="w-3 h-3 text-gray-700" />
-            <span className="text-[11px] text-gray-700 font-medium">
-              {new Date(match.match_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+            )}
+            {/* BO badge */}
+            <span className="text-[10px] font-bold text-gray-700 px-1.5 py-0.5 rounded"
+              style={{ background: 'rgba(255,255,255,0.03)' }}>
+              BO{match.best_of}
             </span>
           </div>
-        )}
-      </div>
+
+          {/* Main: team vs team with score */}
+          <div className="flex items-center gap-3">
+            {/* Team 1 */}
+            <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+              <span className="font-black text-white text-sm truncate"
+                style={{ color: match.winner_team_id === match.team1_id ? match.team1_color : undefined }}>
+                {match.team1_name}
+              </span>
+              <span className="text-[10px] font-black px-1.5 py-0.5 rounded flex-shrink-0"
+                style={{ background: `${match.team1_color}18`, color: match.team1_color, border: `1px solid ${match.team1_color}25` }}>
+                {match.team1_short}
+              </span>
+            </div>
+
+            {/* Score */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className="text-lg font-black w-7 text-center" style={{ color: match.team1_color }}>
+                {match.team1_score}
+              </span>
+              <span className="text-gray-700 font-black text-xs">:</span>
+              <span className="text-lg font-black w-7 text-center" style={{ color: match.team2_color }}>
+                {match.team2_score}
+              </span>
+            </div>
+
+            {/* Team 2 */}
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <span className="text-[10px] font-black px-1.5 py-0.5 rounded flex-shrink-0"
+                style={{ background: `${match.team2_color}18`, color: match.team2_color, border: `1px solid ${match.team2_color}25` }}>
+                {match.team2_short}
+              </span>
+              <span className="font-black text-white text-sm truncate"
+                style={{ color: match.winner_team_id === match.team2_id ? match.team2_color : undefined }}>
+                {match.team2_name}
+              </span>
+            </div>
+
+            {/* Winner badge */}
+            {match.winner_team_id && (
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md flex-shrink-0"
+                style={{ color: winnerColor, background: `${winnerColor}12`, border: `1px solid ${winnerColor}20` }}>
+                {match.winner_short} W
+              </span>
+            )}
+
+            {/* Expand indicator */}
+            <ChevronDown className={`w-4 h-4 text-gray-700 flex-shrink-0 transition-transform duration-200 group-hover:text-gray-500 ${expanded ? 'rotate-180' : ''}`} />
+          </div>
+        </div>
+      </button>
+
+      {/* Delete button — overlaid top right */}
+      <button onClick={handleDelete} disabled={deleting} title="Delete match"
+        className="absolute top-3 right-3 p-1.5 rounded-lg text-gray-800 hover:text-red-400 hover:bg-red-500/10 transition-all z-10">
+        <Trash2 className="w-3.5 h-3.5" />
+      </button>
 
       {/* ── Expanded content ────────────────────────────────────────── */}
       {expanded && (
-        <div className="px-4 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="px-5 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
           {loadingStats ? (
             <div className="py-8 flex justify-center">
               <div className="w-5 h-5 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
@@ -326,6 +385,6 @@ export function MatchAdminCard({ match, players, onDelete, onStatsSaved }: {
           )}
         </div>
       )}
-    </AdminPanel>
+    </div>
   );
 }

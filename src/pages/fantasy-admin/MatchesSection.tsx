@@ -217,7 +217,7 @@ export function MatchesSection({
       {filteredMatches.length === 0 ? (
         <EmptyState hasMatches={matches.length > 0} />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {[...filteredMatches]
             .sort((a, b) => b.id - a.id)
             .map(match => (
