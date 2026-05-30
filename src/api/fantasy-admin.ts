@@ -1,4 +1,4 @@
-import type { IKLMatch, AuditLogEntry } from './fantasy';
+import type { IKLMatch, IKLSeason, AuditLogEntry } from './fantasy';
 import { API, apiFetch } from './fantasy';
 
 // ── Admin: match management ──────────────────────────────────────────────────
@@ -236,5 +236,122 @@ export async function adminCsvImportStats(matchId: number, gameNumber: number, c
   });
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || 'CSV import failed');
+  return d;
+}
+
+// ── Admin: Season CRUD ────────────────────────────────────────────────────
+
+export async function adminCreateSeason(data: {
+  name: string; fullName?: string; dates?: string; prizePool?: string; edition?: string; status?: string;
+}): Promise<IKLSeason> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/seasons`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Failed to create season');
+  return d;
+}
+
+export async function adminCloneSeason(sourceSeasonId: number, data: {
+  name: string; fullName?: string; dates?: string; prizePool?: string; edition?: string; startDate?: string;
+}): Promise<{ season: IKLSeason; teams: number; players: number; matches: number }> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/seasons/${sourceSeasonId}/clone`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Failed to clone season');
+  return d;
+}
+
+export async function adminDeleteSeason(seasonId: number): Promise<void> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/seasons/${seasonId}`, {
+    method: 'DELETE',
+  });
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    throw new Error((d as Record<string, string>).error || 'Failed to delete season');
+  }
+}
+
+// ── Admin: Team CRUD ──────────────────────────────────────────────────────
+
+export async function adminCreateTeam(seasonId: number, data: {
+  name: string; shortName: string; color?: string; logoUrl?: string;
+}): Promise<{ id: number; name: string; short_name: string }> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/seasons/${seasonId}/teams`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Failed to create team');
+  return d;
+}
+
+export async function adminUpdateTeam(teamId: number, data: {
+  name?: string; shortName?: string; color?: string; logoUrl?: string;
+}): Promise<void> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/teams/${teamId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    throw new Error((d as Record<string, string>).error || 'Failed to update team');
+  }
+}
+
+export async function adminDeleteTeam(teamId: number): Promise<void> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/teams/${teamId}`, {
+    method: 'DELETE',
+  });
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    throw new Error((d as Record<string, string>).error || 'Failed to delete team');
+  }
+}
+
+// ── Admin: Player CRUD ────────────────────────────────────────────────────
+
+export async function adminCreatePlayer(teamId: number, data: {
+  name: string; role: string; price?: number; nationality?: string; photoUrl?: string;
+}): Promise<{ id: number; name: string; role: string }> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/teams/${teamId}/players`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Failed to create player');
+  return d;
+}
+
+export async function adminDeletePlayer(playerId: number): Promise<void> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/players/${playerId}`, {
+    method: 'DELETE',
+  });
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    throw new Error((d as Record<string, string>).error || 'Failed to delete player');
+  }
+}
+
+// ── Admin: Schedule generation ────────────────────────────────────────────
+
+export async function adminGenerateSchedule(seasonId: number, data: {
+  startDate?: string; bestOf?: number;
+}): Promise<{ ok: boolean; matches: number; weeks: number }> {
+  const r = await apiFetch(`${API}/api/fantasy/admin/seasons/${seasonId}/generate-schedule`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Failed to generate schedule');
   return d;
 }

@@ -3,6 +3,7 @@ import type { AdminSectionProps } from './adminConstants';
 import { getStatusConfig } from './adminConstants';
 import { AdminPanel } from './shared';
 import { SeasonSettingsPanel } from './SeasonSettingsPanel';
+import { SeasonManagerPanel } from './SeasonManagerPanel';
 
 /* ── Season detail row ───────────────────────────────────────────────────── */
 
@@ -95,29 +96,50 @@ export function SeasonSection({
   allSeasons,
   selectedSeasonId,
   onSwitchSeason,
+  onSetAllSeasons,
+  onSetSelectedSeasonId,
+  onRefreshMatches,
 }: AdminSectionProps) {
-  if (!season) return null;
-
-  const details = buildDetails(season, players, matches);
+  async function handleRefresh() {
+    const { getSeasons } = await import('../../api/fantasy');
+    const seasons = await getSeasons();
+    onSetAllSeasons(seasons);
+    if (seasons.length > 0) {
+      const current = seasons.find(s => s.id === selectedSeasonId);
+      if (!current) onSetSelectedSeasonId(seasons[0].id);
+    }
+    onRefreshMatches();
+  }
 
   return (
     <div className="space-y-6">
-      <SeasonSettingsPanel seasonId={season.id} initial={seasonMeta} />
+      {/* Season Manager — create / clone / add teams & players */}
+      <SeasonManagerPanel
+        allSeasons={allSeasons}
+        season={season}
+        onRefresh={handleRefresh}
+      />
 
-      {/* Season details */}
-      <AdminPanel>
-        <div className="p-5">
-          <h3 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-4 flex items-center gap-2">
-            <Info className="w-3.5 h-3.5 text-amber-500/60" />
-            Season Details
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-x-6">
-            {details.map((item) => (
-              <DetailRow key={item.label} label={item.label} value={item.value} icon={item.icon} />
-            ))}
-          </div>
-        </div>
-      </AdminPanel>
+      {season && (
+        <>
+          <SeasonSettingsPanel seasonId={season.id} initial={seasonMeta} />
+
+          {/* Season details */}
+          <AdminPanel>
+            <div className="p-5">
+              <h3 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-4 flex items-center gap-2">
+                <Info className="w-3.5 h-3.5 text-amber-500/60" />
+                Season Details
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-x-6">
+                {buildDetails(season, players, matches).map((item) => (
+                  <DetailRow key={item.label} label={item.label} value={item.value} icon={item.icon} />
+                ))}
+              </div>
+            </div>
+          </AdminPanel>
+        </>
+      )}
 
       {/* All seasons list */}
       {allSeasons.length > 1 && (
