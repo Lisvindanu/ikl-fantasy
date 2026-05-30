@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Copy, Trash2, Users, UserPlus, CalendarPlus, ChevronDown, ChevronUp } from 'lucide-react';
 import * as fantasyApi from '../../api/fantasy';
+import { API } from '../../api/fantasy';
 import type { IKLSeason, IKLTeam } from '../../api/fantasy';
 import { AdminPanel, Field, Input, Select } from './shared';
 
@@ -394,7 +395,7 @@ function TeamList({ teams, onRefresh }: { teams: IKLTeam[]; onRefresh: () => voi
           style={{ border: '1px solid rgba(255,255,255,0.04)' }}>
           <div className="flex items-center gap-2.5">
             {t.logo_url ? (
-              <img src={t.logo_url} alt={t.short_name} className="w-6 h-6 rounded object-contain" />
+              <img src={`${API}${t.logo_url}`} alt={t.short_name} className="w-6 h-6 rounded object-contain" />
             ) : (
               <div className="w-6 h-6 rounded flex items-center justify-center text-[9px] font-black"
                 style={{ background: t.color + '20', color: t.color, border: `1px solid ${t.color}30` }}>
