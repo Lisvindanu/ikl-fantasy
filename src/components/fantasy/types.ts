@@ -1,27 +1,27 @@
 import type { IKLPlayer } from '../../api/fantasy';
 
 export type Tab = 'overview' | 'draft' | 'players' | 'leaderboard' | 'matches' | 'team' | 'leagues' | 'predictions' | 'achievements' | 'compare' | 'meta';
-export type Role = 'EXP' | 'JGL' | 'MID' | 'GOLD' | 'ROAM';
+export type Role = 'CLASH' | 'JGL' | 'MID' | 'FARM' | 'ROAM';
 export type SortBy = 'pts' | 'price' | 'mvps';
 
-export const ROLES: Role[] = ['EXP', 'JGL', 'MID', 'GOLD', 'ROAM'];
+export const ROLES: Role[] = ['CLASH', 'JGL', 'MID', 'FARM', 'ROAM'];
 export const BUDGET = 100;
 export const MAX_PER_TEAM = 2;
 
 export const ROLE_META: Record<Role, { label: string; color: string; img: string; short: string }> = {
-  EXP:  { label: 'Clash Laner', short: 'CLASH', color: '#F97316', img: '/assets/lanes/clash-lane.webp' },
-  JGL:  { label: 'Jungler',     short: 'JGL',   color: '#22C55E', img: '/assets/lanes/jungle.webp'     },
-  MID:  { label: 'Mid Laner',   short: 'MID',   color: '#3B82F6', img: '/assets/lanes/mid-lane.webp'   },
-  GOLD: { label: 'Farm Laner',  short: 'FARM',  color: '#EAB308', img: '/assets/lanes/farm-lane.webp'  },
-  ROAM: { label: 'Roamer',      short: 'ROAM',  color: '#A855F7', img: '/assets/lanes/roamer.webp'     },
+  CLASH: { label: 'Clash Laner', short: 'CLASH', color: '#F97316', img: '/assets/lanes/clash-lane.webp' },
+  JGL:   { label: 'Jungler',     short: 'JGL',   color: '#22C55E', img: '/assets/lanes/jungle.webp'     },
+  MID:   { label: 'Mid Laner',   short: 'MID',   color: '#3B82F6', img: '/assets/lanes/mid-lane.webp'   },
+  FARM:  { label: 'Farm Laner',  short: 'FARM',  color: '#EAB308', img: '/assets/lanes/farm-lane.webp'  },
+  ROAM:  { label: 'Roamer',      short: 'ROAM',  color: '#A855F7', img: '/assets/lanes/roamer.webp'     },
 };
 
 export const NAT_FLAG: Record<string, string> = { ID: '🇮🇩', MY: '🇲🇾', CN: '🇨🇳', HK: '🇭🇰', TH: '🇹🇭' };
 
 export const FORMATION_LAYOUT: Role[][] = [
-  ['EXP'],
+  ['CLASH'],
   ['JGL', 'MID'],
-  ['ROAM', 'GOLD'],
+  ['ROAM', 'FARM'],
 ];
 
 export const BENCH_SLOTS = 2;

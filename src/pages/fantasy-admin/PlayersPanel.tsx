@@ -7,9 +7,9 @@ import type { IKLPlayer } from '../../api/fantasy';
 type SortKey = 'name' | 'role' | 'team_short' | 'price' | 'fantasy_pts' | 'mvps';
 type SortDir = 'asc' | 'desc';
 const PAGE_SIZE = 15;
-const ROLES = ['all', 'EXP', 'JGL', 'MID', 'GOLD', 'ROAM'] as const;
+const ROLES = ['all', 'CLASH', 'JGL', 'MID', 'FARM', 'ROAM'] as const;
 const ROLE_COLOR: Record<string, string> = {
-  JGL: '#22C55E', MID: '#3B82F6', GOLD: '#F59E0B', EXP: '#A855F7', ROAM: '#06B6D4',
+  JGL: '#22C55E', MID: '#3B82F6', FARM: '#EAB308', CLASH: '#F97316', ROAM: '#A855F7',
 };
 
 function SortIcon({ field, active, dir }: { field: SortKey; active: SortKey; dir: SortDir }) {
@@ -133,7 +133,7 @@ function EditModal({ player, onClose, onSaved }: {
                   background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2))',
                   border: '1px solid rgba(255,255,255,0.08)',
                 }}>
-                {['EXP', 'JGL', 'MID', 'GOLD', 'ROAM'].map(r => <option key={r} value={r}>{r}</option>)}
+                {['CLASH', 'JGL', 'MID', 'FARM', 'ROAM'].map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </Field>
             <Field label="Price (M)">

@@ -61,7 +61,7 @@ export interface IKLPlayer {
   team_id: number;
   season_id: number;
   name: string;
-  role: 'EXP' | 'JGL' | 'MID' | 'GOLD' | 'ROAM';
+  role: 'CLASH' | 'JGL' | 'MID' | 'FARM' | 'ROAM';
   nationality: string;
   price: number;
   mvps: number;

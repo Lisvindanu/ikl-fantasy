@@ -34,7 +34,7 @@ export function DraftActions({
       />
       <div className="flex gap-2">
         <button
-          onClick={() => { setPicks({ EXP: null, JGL: null, MID: null, GOLD: null, ROAM: null }); setBenchPicks([null, null]); }}
+          onClick={() => { setPicks({ CLASH: null, JGL: null, MID: null, FARM: null, ROAM: null }); setBenchPicks([null, null]); }}
           className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-gray-600 hover:text-white transition-colors"
           style={{ background: '#0d1017', border: '1px solid rgba(255,255,255,0.08)' }}>
           <RotateCcw className="w-4 h-4" /> Reset

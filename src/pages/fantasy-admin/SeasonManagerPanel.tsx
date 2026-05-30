@@ -5,7 +5,7 @@ import { API } from '../../api/fantasy';
 import type { IKLSeason, IKLTeam } from '../../api/fantasy';
 import { AdminPanel, Field, Input, Select } from './shared';
 
-const ROLES = ['EXP', 'JGL', 'MID', 'GOLD', 'ROAM'] as const;
+const ROLES = ['CLASH', 'JGL', 'MID', 'FARM', 'ROAM'] as const;
 
 /* ── Create Season Form ──────────────────────────────────────────────────── */
 

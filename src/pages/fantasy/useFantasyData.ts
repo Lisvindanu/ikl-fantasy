@@ -57,10 +57,10 @@ export function useFantasyData() {
   const [saveMsg, setSaveMsg] = useState('');
 
   const [picks, setPicks] = useState<Record<Role, IKLPlayer | null>>({
-    EXP: null, JGL: null, MID: null, GOLD: null, ROAM: null,
+    CLASH: null, JGL: null, MID: null, FARM: null, ROAM: null,
   });
   const [teamName, setTeamName] = useState('My Fantasy Team');
-  const [activeRole, setActiveRole] = useState<Role>('EXP');
+  const [activeRole, setActiveRole] = useState<Role>('CLASH');
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState<Role | 'ALL'>('ALL');
   const [sortBy, setSortBy] = useState<SortBy>('pts');
@@ -113,7 +113,7 @@ export function useFantasyData() {
         if (Array.isArray(frm)) setFormData(frm);
 
         // Reset draft state for fresh season load
-        setPicks({ EXP: null, JGL: null, MID: null, GOLD: null, ROAM: null });
+        setPicks({ CLASH: null, JGL: null, MID: null, FARM: null, ROAM: null });
         setBenchPicks([null, null]);
         setTeamName('My Fantasy Team');
         setCaptainId(null);
@@ -129,7 +129,7 @@ export function useFantasyData() {
           if (mt?.picks?.length) {
             setMyTeam(mt);
             setTeamName(mt.name || 'My Fantasy Team');
-            const newPicks: Record<Role, IKLPlayer | null> = { EXP: null, JGL: null, MID: null, GOLD: null, ROAM: null };
+            const newPicks: Record<Role, IKLPlayer | null> = { CLASH: null, JGL: null, MID: null, FARM: null, ROAM: null };
             const newBench: [IKLPlayer | null, IKLPlayer | null] = [null, null];
             for (const pick of mt.picks) {
               const full = (Array.isArray(p) ? p : []).find(pl => pl.id === pick.player_id);

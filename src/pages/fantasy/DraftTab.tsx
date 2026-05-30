@@ -398,7 +398,7 @@ export function DraftTab({
   const [shareMsg, setShareMsg] = useState('');
 
   function handleShare() {
-    const roleNames: Record<string, string> = { EXP: 'EXP', JGL: 'JGL', MID: 'MID', GOLD: 'GOLD', ROAM: 'ROAM' };
+    const roleNames: Record<string, string> = { CLASH: 'CLASH', JGL: 'JGL', MID: 'MID', FARM: 'FARM', ROAM: 'ROAM' };
     const lines = Object.entries(picks)
       .filter(([, p]) => p !== null)
       .map(([role, p]) => `${roleNames[role]}: ${p!.name}`)
@@ -582,7 +582,7 @@ export function DraftTab({
         {/* Save actions */}
         <div className="flex gap-2">
           <button
-            onClick={() => { setPicks({ EXP: null, JGL: null, MID: null, GOLD: null, ROAM: null }); setBenchPicks([null, null]); }}
+            onClick={() => { setPicks({ CLASH: null, JGL: null, MID: null, FARM: null, ROAM: null }); setBenchPicks([null, null]); }}
             className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-colors text-gray-600 hover:text-white"
             style={{ background: '#0d1017', border: '1px solid rgba(255,255,255,0.08)' }}>
             <RotateCcw className="w-4 h-4" /> Reset

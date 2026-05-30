@@ -14,7 +14,7 @@ const TOUR_STEPS = [
   },
   {
     title: 'Build Your Squad',
-    desc: 'In Draft mode, select players across all 5 roles (EXP, JGL, MID, GOLD, ROAM). Stay within your 100 credit budget.',
+    desc: 'In Draft mode, select players across all 5 roles (Clash, JGL, MID, Farm, Roam). Stay within your 100 credit budget.',
     icon: '\u{2694}\u{FE0F}',
   },
   {
