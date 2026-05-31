@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LogOut, Shield, Gamepad2, Users, Mail } from 'lucide-react';
+import { Menu, X, LogOut, Shield, Gamepad2, Users, Mail, HelpCircle } from 'lucide-react';
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -17,6 +17,7 @@ interface NavLink {
 const NAV_LINKS: readonly NavLink[] = [
   { to: '/', label: 'Home', icon: <Gamepad2 className="w-4 h-4" /> },
   { to: '/play', label: 'Play', icon: <Users className="w-4 h-4" /> },
+  { to: '/how-to-play', label: 'How to Play', icon: <HelpCircle className="w-4 h-4" /> },
   { to: '/admin', label: 'Admin', icon: <Shield className="w-4 h-4" />, adminOnly: true },
 ] as const;
 

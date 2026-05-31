@@ -268,7 +268,7 @@ export function ModeSelector({ onSelect, meta }: Props) {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col items-center gap-2">
+      <div className="mt-6 flex flex-col items-center gap-3">
         <button
           onClick={() => onSelect('both')}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:bg-white/[0.06]"
@@ -279,6 +279,11 @@ export function ModeSelector({ onSelect, meta }: Props) {
           Ikut keduanya sekaligus
         </button>
         <p className="text-gray-700 text-xs">Draft pemain + pick tim — dapet poin dari keduanya</p>
+        <a href="/how-to-play"
+          className="flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-amber-400 transition-colors mt-1">
+          <AlertCircle className="w-3.5 h-3.5" />
+          Cara bermain &amp; aturan lengkap
+        </a>
       </div>
     </div>
   );

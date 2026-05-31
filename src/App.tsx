@@ -44,6 +44,12 @@ const LeagueDetail = lazy(() =>
   })),
 );
 
+const HowToPlayPage = lazy(() =>
+  import('./pages/HowToPlayPage').then((m) => ({
+    default: m.HowToPlayPage,
+  })),
+);
+
 // MobileDraftPage is rendered inside FantasyLeaguePage's draft tab for mobile
 // viewports, so it does not need its own route. The /mobile-draft route
 // redirects to /play.
@@ -146,6 +152,18 @@ const mobileDraftRoute = createRoute({
   },
 });
 
+const howToPlayRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/how-to-play',
+  component: function HowToPlay() {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <HowToPlayPage />
+      </Suspense>
+    );
+  },
+});
+
 // ── Catch-all route ──────────────────────────────────────────────────────────
 
 const notFoundRoute = createRoute({
@@ -177,6 +195,7 @@ const routeTree = rootRoute.addChildren([
   playerRoute,
   leagueRoute,
   mobileDraftRoute,
+  howToPlayRoute,
   notFoundRoute,
 ]);
 

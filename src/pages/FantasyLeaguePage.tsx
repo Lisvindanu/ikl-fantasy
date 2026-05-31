@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Users, Shield, Lock } from 'lucide-react';
+import { Users, Shield } from 'lucide-react';
 import * as fantasyApi from '../api/fantasy';
 import { useFantasyData } from './fantasy/useFantasyData';
 import { OnboardingTour } from '../components/fantasy/OnboardingTour';
@@ -34,11 +34,10 @@ function LoginGate({ title, description, icon }: { title: string; description: s
       </div>
       <h3 className="text-white font-black text-2xl mb-2">{title}</h3>
       <p className="text-gray-400 text-sm mb-6">{description}</p>
-      <a href="/auth"
-        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-black"
-        style={{ background: 'linear-gradient(135deg, #FBBF24, #F59E0B)' }}>
-        <Lock className="w-4 h-4" />
-        Login untuk bermain
+      <p className="text-gray-500 text-xs mb-4">Login lewat tombol di header untuk mulai bermain</p>
+      <a href="/how-to-play"
+        className="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-amber-400 transition-colors">
+        Pelajari cara bermain &rarr;
       </a>
     </div>
   );
@@ -157,7 +156,7 @@ export function FantasyLeaguePage() {
             isAuthenticated={data.isAuthenticated}
             onBackToModeSelector={() => {
               if (data.isAuthenticated) data.setShowModeSelector(true);
-              else window.location.href = '/auth';
+              else window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             allSeasons={data.allSeasons}
             selectedSeasonId={data.selectedSeasonId}
@@ -178,7 +177,7 @@ export function FantasyLeaguePage() {
             isAuthenticated={data.isAuthenticated}
             onBackToModeSelector={() => {
               if (data.isAuthenticated) data.setShowModeSelector(true);
-              else window.location.href = '/auth';
+              else window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             allSeasons={data.allSeasons}
             selectedSeasonId={data.selectedSeasonId}
@@ -296,7 +295,7 @@ export function FantasyLeaguePage() {
                     seasonId={season.id}
                     isAuthenticated={data.isAuthenticated}
                     userId={data.user ? Number(data.user.id) : null}
-                    onGoToLogin={() => { window.location.href = '/auth'; }}
+                    onGoToLogin={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                     spectateLeagueId={data.spectateLeagueId}
                   />
                 </motion.div>
