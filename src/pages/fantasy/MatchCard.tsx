@@ -47,7 +47,7 @@ export function GameStatsRow({ stats, gameNumber, isUltimateBattle, vodLink }: {
           </span>
         )}
         {vodLink && (
-          <a href={`${vodLink.url}${vodLink.url.includes('?') ? '&' : '?'}t=${vodLink.timestamp}`}
+          <a href={vodLink.url}
             target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold normal-case tracking-normal hover:opacity-80 transition-opacity"
             style={{ background: 'rgba(239,68,68,0.12)', color: '#F87171', border: '1px solid rgba(239,68,68,0.2)' }}
