@@ -70,6 +70,7 @@ export interface FantasyNavProps {
   tab: Tab;
   setTab: (t: Tab) => void;
   activeMode: 'player' | 'team' | 'both' | null;
+  isAuthenticated?: boolean;
   onBackToModeSelector: () => void;
   allSeasons: IKLSeason[];
   selectedSeasonId: number | null;
@@ -151,7 +152,7 @@ function SeasonSwitcher({ allSeasons, selectedSeasonId, onSwitch }: {
 // ── Desktop Navbar ───────────────────────────────────────────────────────────
 
 export function DesktopTabNav({
-  tab, setTab, activeMode, onBackToModeSelector,
+  tab, setTab, activeMode, isAuthenticated, onBackToModeSelector,
   allSeasons, selectedSeasonId, onSwitchSeason,
 }: FantasyNavProps) {
   const navItems = getNavItems(activeMode);
@@ -205,7 +206,7 @@ export function DesktopTabNav({
             <button onClick={onBackToModeSelector}
               className="flex items-center gap-1.5 text-[11px] font-bold text-gray-600 hover:text-gray-400 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-white/5">
               <ArrowLeft className="w-3 h-3" />
-              Mode
+              {isAuthenticated ? 'Mode' : 'Login'}
             </button>
           </div>
         </div>

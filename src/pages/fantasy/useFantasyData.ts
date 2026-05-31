@@ -51,8 +51,10 @@ export function useFantasyData() {
   const [, setMyTeam] = useState<FantasyTeam | null>(null);
   const [loading, setLoading] = useState(true);
   const [seasonMeta, setSeasonMeta] = useState<SeasonMeta | null>(null);
-  const [showModeSelector, setShowModeSelector] = useState(!spectateLeagueId);
-  const [activeMode, setActiveMode] = useState<'player' | 'team' | 'both' | null>(null);
+  const [showModeSelector, setShowModeSelector] = useState(!spectateLeagueId && isAuthenticated);
+  const [activeMode, setActiveMode] = useState<'player' | 'team' | 'both' | null>(
+    !isAuthenticated && !spectateLeagueId ? 'both' : null,
+  );
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
 

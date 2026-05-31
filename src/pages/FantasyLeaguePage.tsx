@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Users, Shield, Lock } from 'lucide-react';
 import * as fantasyApi from '../api/fantasy';
 import { useFantasyData } from './fantasy/useFantasyData';
 import { OnboardingTour } from '../components/fantasy/OnboardingTour';
@@ -23,6 +24,25 @@ import { CompareTab } from './fantasy/CompareTab';
 import { MetaTab } from './fantasy/MetaTab';
 
 const TOUR_STORAGE_KEY = 'ikl-fantasy-tour-done';
+
+function LoginGate({ title, description, icon }: { title: string; description: string; icon: React.ReactNode }) {
+  return (
+    <div className="max-w-md mx-auto text-center py-16">
+      <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+        style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
+        {icon}
+      </div>
+      <h3 className="text-white font-black text-2xl mb-2">{title}</h3>
+      <p className="text-gray-400 text-sm mb-6">{description}</p>
+      <a href="/auth"
+        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-black"
+        style={{ background: 'linear-gradient(135deg, #FBBF24, #F59E0B)' }}>
+        <Lock className="w-4 h-4" />
+        Login untuk bermain
+      </a>
+    </div>
+  );
+}
 
 export function FantasyLeaguePage() {
   const data = useFantasyData();
@@ -134,7 +154,11 @@ export function FantasyLeaguePage() {
             tab={data.tab}
             setTab={data.setTab}
             activeMode={data.activeMode}
-            onBackToModeSelector={() => data.setShowModeSelector(true)}
+            isAuthenticated={data.isAuthenticated}
+            onBackToModeSelector={() => {
+              if (data.isAuthenticated) data.setShowModeSelector(true);
+              else window.location.href = '/auth';
+            }}
             allSeasons={data.allSeasons}
             selectedSeasonId={data.selectedSeasonId}
             onSwitchSeason={data.switchSeason}
@@ -151,7 +175,11 @@ export function FantasyLeaguePage() {
 
           <MobileTopHeader
             activeMode={data.activeMode}
-            onBackToModeSelector={() => data.setShowModeSelector(true)}
+            isAuthenticated={data.isAuthenticated}
+            onBackToModeSelector={() => {
+              if (data.isAuthenticated) data.setShowModeSelector(true);
+              else window.location.href = '/auth';
+            }}
             allSeasons={data.allSeasons}
             selectedSeasonId={data.selectedSeasonId}
             onSwitchSeason={data.switchSeason}
@@ -186,17 +214,27 @@ export function FantasyLeaguePage() {
 
               {data.tab === 'draft' && (
                 <motion.div key="draft" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                  {data.seasonMeta?.picks_lock_at && (
-                    <div className="mb-4">
-                      <NotificationReminder picksLockAt={data.seasonMeta.picks_lock_at} />
-                    </div>
+                  {!data.isAuthenticated ? (
+                    <LoginGate
+                      title="Fantasy Draft"
+                      description="Draft 5 pemain IKL dengan budget 100 kredit. Pilih kapten untuk poin ganda!"
+                      icon={<Users className="w-8 h-8 text-amber-400" />}
+                    />
+                  ) : (
+                    <>
+                      {data.seasonMeta?.picks_lock_at && (
+                        <div className="mb-4">
+                          <NotificationReminder picksLockAt={data.seasonMeta.picks_lock_at} />
+                        </div>
+                      )}
+                      <div className="lg:hidden">
+                        <MobileDraftPage {...data.draftProps} />
+                      </div>
+                      <div className="hidden lg:block">
+                        <DraftTab {...data.draftProps} />
+                      </div>
+                    </>
                   )}
-                  <div className="lg:hidden">
-                    <MobileDraftPage {...data.draftProps} />
-                  </div>
-                  <div className="hidden lg:block">
-                    <DraftTab {...data.draftProps} />
-                  </div>
                 </motion.div>
               )}
 
@@ -230,17 +268,25 @@ export function FantasyLeaguePage() {
 
               {data.tab === 'team' && (
                 <motion.div key="team" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                  <TeamPickTab
-                    season={season}
-                    isAuthenticated={data.isAuthenticated}
-                    mySelection={data.myTeamSelection}
-                    leaderboard={data.teamLeaderboard}
-                    onSelectionSaved={sel => {
-                      data.setMyTeamSelection(sel);
-                      fantasyApi.getTeamLeaderboard(season.id).then(lb => data.setTeamLeaderboard(Array.isArray(lb) ? lb : [])).catch(() => {});
-                    }}
-                    onGoToLogin={() => data.setTab('draft')}
-                  />
+                  {!data.isAuthenticated ? (
+                    <LoginGate
+                      title="Fantasy Team"
+                      description="Pilih 1 tim IKL jagoanmu. Setiap kali mereka menang, kamu dapat poin!"
+                      icon={<Shield className="w-8 h-8 text-purple-400" />}
+                    />
+                  ) : (
+                    <TeamPickTab
+                      season={season}
+                      isAuthenticated={data.isAuthenticated}
+                      mySelection={data.myTeamSelection}
+                      leaderboard={data.teamLeaderboard}
+                      onSelectionSaved={sel => {
+                        data.setMyTeamSelection(sel);
+                        fantasyApi.getTeamLeaderboard(season.id).then(lb => data.setTeamLeaderboard(Array.isArray(lb) ? lb : [])).catch(() => {});
+                      }}
+                      onGoToLogin={() => data.setTab('draft')}
+                    />
+                  )}
                 </motion.div>
               )}
 
