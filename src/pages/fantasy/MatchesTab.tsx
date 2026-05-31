@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Swords, Trophy, Radio, Target, Zap, BarChart3, X, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { IKLMatch, IKLPlayer, IKLTeam, MatchPlayerStat, MatchPreview, VodTimestamp } from '../../api/fantasy';
-import { getMatches, getMatchStats, getMatchPreview, API } from '../../api/fantasy';
+import { getMatches, getMatchStats, getMatchPreview } from '../../api/fantasy';
 import { STAGE_LABEL, GameStatsRow, FormDots } from './MatchCard';
 import { PredictionCard } from './PredictionCard';
 import { MatchComments } from './MatchComments';
@@ -41,7 +41,7 @@ function MatchRow({ match, onClick, isSelected }: { match: IKLMatch; onClick?: (
           {match.team1_short}
         </span>
         {match.team1_logo ? (
-          <img src={`${API}${match.team1_logo}`} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+          <img src={match.team1_logo!} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
         ) : (
           <div className="w-1.5 h-4 rounded-full flex-shrink-0" style={{ background: match.team1_color }} />
         )}
@@ -75,7 +75,7 @@ function MatchRow({ match, onClick, isSelected }: { match: IKLMatch; onClick?: (
       <div className="flex-1 flex items-center gap-1.5 px-2.5 py-2 justify-end min-w-0"
         style={{ background: t2Win ? `${match.team2_color}15` : 'transparent' }}>
         {match.team2_logo ? (
-          <img src={`${API}${match.team2_logo}`} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+          <img src={match.team2_logo!} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
         ) : (
           <div className="w-1.5 h-4 rounded-full flex-shrink-0" style={{ background: match.team2_color }} />
         )}
@@ -172,7 +172,7 @@ function TeamStandings({ teams }: { teams: IKLTeam[] }) {
                 <td className="px-2 py-1.5">
                   <div className="flex items-center gap-2">
                     {team.logo_url ? (
-                      <img src={`${API}${team.logo_url}`} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
+                      <img src={team.logo_url!} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
                     ) : (
                       <div className="w-1.5 h-4 rounded-full flex-shrink-0" style={{ background: team.color }} />
                     )}
@@ -221,7 +221,7 @@ function ChampionBanner({ matches }: { matches: IKLMatch[] }) {
         <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Season Champion</div>
         <div className="flex items-center justify-center gap-3">
           {winner.logo && (
-            <img src={`${API}${winner.logo}`} alt="" className="w-10 h-10 object-contain" />
+            <img src={winner.logo!} alt="" className="w-10 h-10 object-contain" />
           )}
           <span className="text-2xl font-black text-white">{winner.name}</span>
         </div>
@@ -273,7 +273,7 @@ function CrossTableMatrix({ matches, teams }: { matches: IKLMatch[]; teams: IKLT
               {sorted.map(t => (
                 <th key={t.id} className="px-1 py-2 text-center font-bold whitespace-nowrap" style={{ color: t.color, minWidth: 44 }}>
                   {t.logo_url ? (
-                    <img src={`${API}${t.logo_url}`} alt={t.short_name} className="w-5 h-5 object-contain mx-auto mb-0.5" />
+                    <img src={t.logo_url!} alt={t.short_name} className="w-5 h-5 object-contain mx-auto mb-0.5" />
                   ) : null}
                   <div className="text-[10px]">{t.short_name}</div>
                 </th>
@@ -286,7 +286,7 @@ function CrossTableMatrix({ matches, teams }: { matches: IKLMatch[]; teams: IKLT
                 <td className="px-2 py-1.5 font-bold sticky left-0 z-10 bg-[#0d1017]">
                   <div className="flex items-center gap-1.5 whitespace-nowrap">
                     {row.logo_url ? (
-                      <img src={`${API}${row.logo_url}`} alt="" className="w-4 h-4 object-contain" />
+                      <img src={row.logo_url!} alt="" className="w-4 h-4 object-contain" />
                     ) : (
                       <div className="w-1.5 h-4 rounded-full" style={{ background: row.color }} />
                     )}
@@ -375,7 +375,7 @@ function MatchDetailModal({ match, onClose }: { match: IKLMatch; onClose: () => 
           {/* Teams + Score */}
           <div className="flex items-center gap-3">
             <div className="flex-1 flex items-center gap-2 min-w-0">
-              {match.team1_logo ? <img src={`${API}${match.team1_logo}`} alt="" className="w-8 h-8 object-contain flex-shrink-0" /> : <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: match.team1_color }} />}
+              {match.team1_logo ? <img src={match.team1_logo!} alt="" className="w-8 h-8 object-contain flex-shrink-0" /> : <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: match.team1_color }} />}
               <div className="min-w-0">
                 <div className={`font-black text-sm ${hasWinner && match.winner_team_id === match.team1_id ? 'text-white' : 'text-gray-500'}`}>{match.team1_short}</div>
                 <div className="text-xs text-gray-700 truncate hidden sm:block">{match.team1_name}</div>
@@ -391,7 +391,7 @@ function MatchDetailModal({ match, onClose }: { match: IKLMatch; onClose: () => 
                 <div className={`font-black text-sm ${hasWinner && match.winner_team_id === match.team2_id ? 'text-white' : 'text-gray-500'}`}>{match.team2_short}</div>
                 <div className="text-xs text-gray-700 truncate hidden sm:block">{match.team2_name}</div>
               </div>
-              {match.team2_logo ? <img src={`${API}${match.team2_logo}`} alt="" className="w-8 h-8 object-contain flex-shrink-0" /> : <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: match.team2_color }} />}
+              {match.team2_logo ? <img src={match.team2_logo!} alt="" className="w-8 h-8 object-contain flex-shrink-0" /> : <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: match.team2_color }} />}
             </div>
           </div>
           {/* Winner + VOD */}

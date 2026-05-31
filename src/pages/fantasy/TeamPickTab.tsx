@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Shield, Trophy, Check, TrendingUp, AlertTriangle, Info } from 'lucide-react';
 import type { IKLTeam, IKLSeason, FantasyTeamSelection, TeamLeaderboardEntry, LoyaltyInfo } from '../../api/fantasy';
 import * as fantasyApi from '../../api/fantasy';
-import { API } from '../../api/fantasy';
 
 // ── Scoring reference ──────────────────────────────────────────────────────────
 const SCORING = [
@@ -37,7 +36,7 @@ function TeamCard({
         {/* Team logo */}
         {team.logo_url ? (
           <img
-            src={`${API}${team.logo_url}`}
+            src={team.logo_url!}
             alt={team.short_name}
             className="w-10 h-10 object-contain flex-shrink-0"
           />

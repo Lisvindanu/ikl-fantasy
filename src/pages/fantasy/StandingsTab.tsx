@@ -4,7 +4,6 @@ import { RolePill } from '../../components/fantasy/RolePill';
 import type { Role } from '../../components/fantasy/types';
 import type { IKLSeason, IKLTeam, IKLPlayer, PlayerOfTheWeek, SeasonRecords, TeamStanding, PlayerNews } from '../../api/fantasy';
 import * as fantasyApi from '../../api/fantasy';
-import { API } from '../../api/fantasy';
 
 interface Props {
   season: IKLSeason & { teams: IKLTeam[] };
@@ -266,7 +265,7 @@ export function StandingsTab({ season, sortedByPts, maxPts, onDetail, onGoToDraf
                         <td className="px-3 py-3">
                           <div className="flex items-center gap-2.5 min-w-0">
                             {team.logo_url ? (
-                              <img src={`${API}${team.logo_url}`} alt={team.short_name}
+                              <img src={team.logo_url!} alt={team.short_name}
                                 className="w-7 h-7 object-contain flex-shrink-0" />
                             ) : (
                               <div className="w-1 h-7 rounded-full flex-shrink-0" style={{ background: team.color }} />

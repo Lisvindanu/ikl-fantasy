@@ -5,7 +5,6 @@ import { RolePill } from '../../components/fantasy/RolePill';
 import type { Role } from '../../components/fantasy/types';
 import type { IKLMatch, MatchPlayerStat, MatchPreview, VodTimestamp } from '../../api/fantasy';
 import * as fantasyApi from '../../api/fantasy';
-import { API } from '../../api/fantasy';
 import { MatchComments } from './MatchComments';
 
 export const STAGE_LABEL: Record<string, string> = {
@@ -208,7 +207,7 @@ export function MatchCard({ match }: { match: IKLMatch }) {
             {/* Team 1 */}
             <div className="flex-1 flex items-center gap-2">
               {match.team1_logo ? (
-                <img src={`${API}${match.team1_logo}`} alt={match.team1_short} className="w-8 h-8 object-contain flex-shrink-0" />
+                <img src={match.team1_logo!} alt={match.team1_short} className="w-8 h-8 object-contain flex-shrink-0" />
               ) : (
                 <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: match.team1_color }} />
               )}
@@ -239,7 +238,7 @@ export function MatchCard({ match }: { match: IKLMatch }) {
                 <div className="text-xs text-gray-700 truncate hidden sm:block">{match.team2_name}</div>
               </div>
               {match.team2_logo ? (
-                <img src={`${API}${match.team2_logo}`} alt={match.team2_short} className="w-8 h-8 object-contain flex-shrink-0" />
+                <img src={match.team2_logo!} alt={match.team2_short} className="w-8 h-8 object-contain flex-shrink-0" />
               ) : (
                 <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: match.team2_color }} />
               )}
