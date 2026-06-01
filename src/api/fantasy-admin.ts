@@ -84,6 +84,7 @@ export interface AdminUser {
   name: string;
   email: string;
   is_admin: boolean;
+  is_superadmin?: boolean;
 }
 
 export async function adminGetAdmins(): Promise<AdminUser[]> {

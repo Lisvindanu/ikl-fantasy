@@ -15,6 +15,8 @@ import { AdminManagementPanel } from './fantasy-admin/AdminManagementPanel';
 export function FantasyAdminPage() {
   const { isAuthenticated, user } = useAuth();
   const isAdmin = isAuthenticated && user?.isAdmin === true;
+  const isSuperAdmin = isAuthenticated && user?.isSuperAdmin === true;
+  const visibleNavItems = isSuperAdmin ? NAV_ITEMS : NAV_ITEMS.filter(i => i.id !== 'admins');
 
   const [allSeasons, setAllSeasons] = useState<IKLSeason[]>([]);
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
@@ -106,7 +108,7 @@ export function FantasyAdminPage() {
       setPlayers(Array.isArray(p) ? p : []);
     }} />,
     season: () => <SeasonSection {...sectionProps} />,
-    admins: () => <AdminManagementPanel />,
+    admins: () => isSuperAdmin ? <AdminManagementPanel /> : null,
     tools: () => <ToolsSection {...sectionProps} />,
   };
 
@@ -169,7 +171,7 @@ export function FantasyAdminPage() {
 
         {!mobileMenuOpen ? (
           <div className="flex overflow-x-auto px-2 pb-2 gap-1 no-scrollbar">
-            {NAV_ITEMS.map(item => (
+            {visibleNavItems.map(item => (
               <button key={item.id} onClick={() => navigateTo(item.id)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all flex-shrink-0"
                 style={{
@@ -182,7 +184,7 @@ export function FantasyAdminPage() {
           </div>
         ) : (
           <div className="px-3 pb-3 space-y-0.5">
-            {NAV_ITEMS.map(item => (
+            {visibleNavItems.map(item => (
               <button key={item.id} onClick={() => navigateTo(item.id)}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all"
                 style={{
@@ -232,7 +234,7 @@ export function FantasyAdminPage() {
           {/* Nav */}
           <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-700 px-3 mb-3">Navigation</p>
-            {NAV_ITEMS.map(item => {
+            {visibleNavItems.map(item => {
               const active = activeSection === item.id;
               return (
                 <button key={item.id} onClick={() => navigateTo(item.id)}

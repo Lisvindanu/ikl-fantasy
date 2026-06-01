@@ -58,7 +58,7 @@ export function Layout() {
     }
   }
 
-  function handleEmailLoginSuccess(token: string, userData: { id: string; name: string; email: string; isAdmin?: boolean }) {
+  function handleEmailLoginSuccess(token: string, userData: { id: string; name: string; email: string; isAdmin?: boolean; isSuperAdmin?: boolean }) {
     login(token, userData);
     setShowAuthModal(false);
   }
@@ -281,7 +281,7 @@ export function Layout() {
 
 function AuthModal({ onClose, onSuccess }: {
   onClose: () => void;
-  onSuccess: (token: string, user: { id: string; name: string; email: string; isAdmin?: boolean }) => void;
+  onSuccess: (token: string, user: { id: string; name: string; email: string; isAdmin?: boolean; isSuperAdmin?: boolean }) => void;
 }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [name, setName] = useState('');
@@ -320,6 +320,7 @@ function AuthModal({ onClose, onSuccess }: {
         name: contributor.name,
         email: contributor.email,
         isAdmin: contributor.isAdmin || contributor.is_admin || false,
+        isSuperAdmin: contributor.isSuperAdmin || contributor.is_superadmin || false,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gagal, coba lagi');

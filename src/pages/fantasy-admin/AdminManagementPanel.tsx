@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Users, Search } from 'lucide-react';
+import { Shield, Crown, Users, Search } from 'lucide-react';
 import * as fantasyApi from '../../api/fantasy';
 import type { AdminUser } from '../../api/fantasy';
 import { AdminPanel, Input } from './shared';
@@ -64,17 +64,32 @@ export function AdminManagementPanel() {
           <div className="space-y-2">
             {admins.map(a => (
               <div key={a.id} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl"
-                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.15)' }}>
-                <Shield className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                style={{
+                  background: a.is_superadmin ? 'rgba(168,85,247,0.08)' : 'rgba(245,158,11,0.08)',
+                  border: `1px solid ${a.is_superadmin ? 'rgba(168,85,247,0.2)' : 'rgba(245,158,11,0.15)'}`,
+                }}>
+                {a.is_superadmin
+                  ? <Crown className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                  : <Shield className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />}
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-white text-sm">{a.name}</div>
+                  <div className="font-bold text-white text-sm flex items-center gap-2">
+                    {a.name}
+                    {a.is_superadmin && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md text-purple-300"
+                        style={{ background: 'rgba(168,85,247,0.15)' }}>
+                        OWNER
+                      </span>
+                    )}
+                  </div>
                   <div className="text-gray-600 text-xs truncate">{a.email}</div>
                 </div>
-                <button onClick={() => handleRevoke(a.id)}
-                  className="text-xs text-red-400 hover:text-red-300 font-bold px-2.5 py-1 rounded-lg transition-colors"
-                  style={{ background: 'rgba(239,68,68,0.08)' }}>
-                  Revoke
-                </button>
+                {!a.is_superadmin && (
+                  <button onClick={() => handleRevoke(a.id)}
+                    className="text-xs text-red-400 hover:text-red-300 font-bold px-2.5 py-1 rounded-lg transition-colors"
+                    style={{ background: 'rgba(239,68,68,0.08)' }}>
+                    Revoke
+                  </button>
+                )}
               </div>
             ))}
           </div>
