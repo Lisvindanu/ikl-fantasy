@@ -167,10 +167,10 @@ export function HowToPlayPage() {
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-3">5 Role yang harus diisi</p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { role: 'CLASH', desc: 'EXP Laner', color: '#EF4444' },
+                  { role: 'CLASH', desc: 'Clash Laner', color: '#EF4444' },
                   { role: 'JGL', desc: 'Jungler', color: '#22C55E' },
                   { role: 'MID', desc: 'Mid Laner', color: '#3B82F6' },
-                  { role: 'FARM', desc: 'Gold Laner', color: '#F59E0B' },
+                  { role: 'FARM', desc: 'Farm Laner', color: '#F59E0B' },
                   { role: 'ROAM', desc: 'Roamer', color: '#A855F7' },
                 ].map(r => (
                   <div key={r.role} className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
@@ -430,7 +430,7 @@ export function HowToPlayPage() {
             />
             <FAQItem
               q="Apa bedanya CLASH, JGL, MID, FARM, ROAM?"
-              a="Ini adalah 5 role di Honor of Kings: CLASH (EXP Lane), JGL (Jungle), MID (Mid Lane), FARM (Gold Lane), ROAM (Roamer/Support). Kamu harus draft 1 pemain untuk setiap role."
+              a="Ini adalah 5 role di Honor of Kings: CLASH (Clash Lane), JGL (Jungle), MID (Mid Lane), FARM (Farm Lane), ROAM (Roamer/Support). Kamu harus draft 1 pemain untuk setiap role."
             />
           </div>
         </Section>
