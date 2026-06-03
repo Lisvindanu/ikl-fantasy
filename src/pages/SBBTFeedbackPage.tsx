@@ -325,6 +325,27 @@ const SECTIONS: readonly Section[] = [
           },
         ],
       },
+      {
+        type: 'radio',
+        id: 'participant_data',
+        label: 'Data peserta (email, HP, IG, player yang dipilih) — mau diakses gimana?',
+        options: [
+          {
+            value: 'admin_panel',
+            label: 'Lihat & filter langsung di admin panel',
+            desc: 'Real-time, bisa search, filter, dan download Excel/CSV kapan aja.',
+          },
+          {
+            value: 'auto_sheets',
+            label: 'Otomatis masuk ke Google Sheets',
+            desc: 'Tiap peserta submit, data langsung muncul di spreadsheet.',
+          },
+          {
+            value: 'both',
+            label: 'Dua-duanya — admin panel + sync ke Sheets',
+          },
+        ],
+      },
     ],
   },
   {
