@@ -378,16 +378,13 @@ const SECTIONS: readonly Section[] = [
     id: 'timeline',
     icon: <Ban className="w-5 h-5" />,
     title: 'Timeline & Prioritas',
-    description: 'Season mulai week 2 Agustus (~5 minggu dari sekarang).',
+    description: 'Konfirmasi timeline dan kebutuhan teknis.',
     questions: [
       {
-        type: 'radio',
-        id: 'launch_priority',
-        label: 'Mau launch apa dulu?',
-        options: [
-          { value: 'sbbt_first', label: 'SBBT (fantasy) dulu, bracket menyusul' },
-          { value: 'both', label: 'Dua-duanya bareng' },
-        ],
+        type: 'text',
+        id: 'launch_deadline',
+        label: 'Target tanggal launch SBBT + Pick\'em?',
+        placeholder: 'Misal: minggu pertama Agustus, atau tanggal spesifik ...',
       },
       {
         type: 'radio',
