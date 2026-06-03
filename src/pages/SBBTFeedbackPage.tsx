@@ -146,6 +146,15 @@ const SECTIONS: readonly Section[] = [
           { value: 'adjustable', label: 'Bisa di-adjust per season' },
         ],
       },
+      {
+        type: 'radio',
+        id: 'player_roster',
+        label: 'Data roster player — kita udah punya 50+ player IKL. Untuk season baru:',
+        options: [
+          { value: 'same', label: 'Roster sama, gak ada perubahan' },
+          { value: 'updated', label: 'Ada perubahan (transfer / pemain baru) — nanti Mas Bimo kirim data-nya' },
+        ],
+      },
     ],
   },
   {
