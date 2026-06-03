@@ -50,6 +50,12 @@ const HowToPlayPage = lazy(() =>
   })),
 );
 
+const SBBTFeedbackPage = lazy(() =>
+  import('./pages/SBBTFeedbackPage').then((m) => ({
+    default: m.SBBTFeedbackPage,
+  })),
+);
+
 // MobileDraftPage is rendered inside FantasyLeaguePage's draft tab for mobile
 // viewports, so it does not need its own route. The /mobile-draft route
 // redirects to /play.
@@ -164,6 +170,18 @@ const howToPlayRoute = createRoute({
   },
 });
 
+const sbbtFeedbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/sbbt-feedback',
+  component: function SBBTFeedback() {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <SBBTFeedbackPage />
+      </Suspense>
+    );
+  },
+});
+
 // ── Catch-all route ──────────────────────────────────────────────────────────
 
 const notFoundRoute = createRoute({
@@ -196,6 +214,7 @@ const routeTree = rootRoute.addChildren([
   leagueRoute,
   mobileDraftRoute,
   howToPlayRoute,
+  sbbtFeedbackRoute,
   notFoundRoute,
 ]);
 
