@@ -36,7 +36,7 @@ interface CheckItem {
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
-const PHONE_NUMBER = '6285156515602'; // your WA number
+const PHONE_NUMBER = '6282254223714';
 
 const SECTIONS: readonly Section[] = [
   {
