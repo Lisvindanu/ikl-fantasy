@@ -133,8 +133,8 @@ const SECTIONS: readonly Section[] = [
         id: 'price_setter',
         label: 'Harga per player (1-9) yang set siapa?',
         options: [
-          { value: 'bimo_send', label: 'Mas Bimo kirim data harganya' },
-          { value: 'admin_panel', label: 'Mas Bimo set sendiri via admin panel' },
+          { value: 'send_data', label: 'Tim IKL kirim data harganya' },
+          { value: 'admin_panel', label: 'Set sendiri via admin panel' },
         ],
       },
       {
@@ -152,7 +152,8 @@ const SECTIONS: readonly Section[] = [
         label: 'Data roster player — kita udah punya 50+ player IKL. Untuk season baru:',
         options: [
           { value: 'same', label: 'Roster sama, gak ada perubahan' },
-          { value: 'updated', label: 'Ada perubahan (transfer / pemain baru) — nanti Mas Bimo kirim data-nya' },
+          { value: 'updated_spreadsheet', label: 'Ada perubahan — akan dikirim via spreadsheet' },
+          { value: 'updated_admin', label: 'Ada perubahan — mau input sendiri di admin panel' },
         ],
       },
     ],
@@ -250,7 +251,7 @@ const SECTIONS: readonly Section[] = [
         id: 'bracket_matchup',
         label: 'Matchup awal bracket:',
         options: [
-          { value: 'manual', label: 'Mas Bimo set manual di admin' },
+          { value: 'manual', label: 'Tim IKL set manual di admin' },
           { value: 'auto', label: 'Auto generate dari seeding' },
         ],
       },
@@ -379,7 +380,7 @@ const SECTIONS: readonly Section[] = [
       {
         type: 'text',
         id: 'admin_access',
-        label: 'Selain Mas Bimo, siapa lagi yang perlu akses admin?',
+        label: 'Siapa aja yang perlu akses admin?',
         placeholder: 'Nama / role ...',
       },
       {
